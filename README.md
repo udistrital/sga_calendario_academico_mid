@@ -1,4 +1,4 @@
-# Tercero - SGA MID
+# Calendario Académico - SGA MID
 
 API MID intermediaria entre el cliente SGA y la API de Eventos con los endpoints requeridos para la gestión del calendario académico.
 
