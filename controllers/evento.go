@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/astaxie/beego"
-	"github.com/udistrital/sga_mid_calendario_academcio/models"
+	"github.com/udistrital/sga_mid_calendario_academico/models"
 	"github.com/udistrital/utils_oas/request"
 )
 

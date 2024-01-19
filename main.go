@@ -1,7 +1,7 @@
 package main
 
 import (
-	_ "github.com/udistrital/sga_mid_calendario_academcio/routers"
+	_ "github.com/udistrital/sga_mid_calendario_academico/routers"
 
 	apistatus "github.com/udistrital/utils_oas/apiStatusLib"
 
