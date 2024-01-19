@@ -22,6 +22,7 @@ TERCEROS_SERVICE: [Servicio API TERCEROS]
 ```
 **NOTA:** Las variables se pueden ver en el fichero conf/app.conf.
 
+
 ### Ejecución del Proyecto
 ```shell
 #1. Obtener el repositorio con Go
