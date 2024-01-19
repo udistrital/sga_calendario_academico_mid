@@ -3,11 +3,12 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/astaxie/beego"
-	"github.com/udistrital/utils_oas/request"
-	"sga_mid_calendario_academcio/models"
 	"strconv"
 	"strings"
+
+	"github.com/astaxie/beego"
+	"github.com/udistrital/sga_mid_calendario_academcio/models"
+	"github.com/udistrital/utils_oas/request"
 )
 
 type ConsultaCalendarioProyectoController struct {

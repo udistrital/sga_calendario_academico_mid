@@ -8,7 +8,7 @@
 package routers
 
 import (
-	"sga_mid_calendario_academcio/controllers"
+	"github.com/udistrital/sga_mid_calendario_academcio/controllers"
 
 	"github.com/astaxie/beego"
 )
