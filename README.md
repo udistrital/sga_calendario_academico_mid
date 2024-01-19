@@ -20,6 +20,9 @@ PARAMETRO_SERVICE: [Servicio API PARAMETRO]
 PROYECTO_ACADEMICO_SERVICE: [Servicio PROYECTO ACADEMICO]
 TERCEROS_SERVICE: [Servicio API TERCEROS]
 ```
+
+
+
 **NOTA:** Las variables se pueden ver en el fichero conf/app.conf.
 
 
