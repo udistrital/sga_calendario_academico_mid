@@ -15,6 +15,62 @@
     },
     "basePath": "/v1",
     "paths": {
+        "/actividad_calendario/": {
+            "post": {
+                "tags": [
+                    "actividad_calendario"
+                ],
+                "description": "Agregar actividad calendario, tipo_publico y tabla de rompimiento calendario_evento_tipo_publico",
+                "operationId": "ActividadCalendarioController.PostActividadCalendario",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "body Agregar Actividad calendario content",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/{}"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{}"
+                    },
+                    "403": {
+                        "description": "body is empty"
+                    }
+                }
+            }
+        },
+        "/actividad_calendario/update/{id}": {
+            "put": {
+                "tags": [
+                    "actividad_calendario"
+                ],
+                "description": "Actualiza tabla de rompimiento calendario_evento_tipo_publico segun los responsables de una Actividad",
+                "operationId": "ActividadCalendarioController.UpdateActividadResponsables",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "body Actualizar responsables de una Actividad content",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/{}"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{}"
+                    },
+                    "403": {
+                        "description": "body is empty"
+                    }
+                }
+            }
+        },
         "/calendario_academico/": {
             "get": {
                 "tags": [
@@ -188,6 +244,67 @@
                 }
             }
         },
+        "/calendario_proyecto/nivel/{idNiv}/periodo/{idPer}": {
+            "get": {
+                "tags": [
+                    "calendario_proyecto"
+                ],
+                "description": "get ConsultaCalendarioAcademico \u0026 id y Project By Id",
+                "operationId": "ConsultaCalendarioProyectoController.GetCalendarProject",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "idNiv",
+                        "description": "Id nivel",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int64"
+                    },
+                    {
+                        "in": "path",
+                        "name": ":idNiv",
+                        "description": "Id periodo",
+                        "required": true,
+                        "type": "integer",
+                        "format": "int64"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    },
+                    "403": {
+                        "description": ":id is empty"
+                    }
+                }
+            }
+        },
+        "/calendario_proyecto/{id}": {
+            "get": {
+                "tags": [
+                    "calendario_proyecto"
+                ],
+                "description": "get ConsultaCalendarioAcademico by id",
+                "operationId": "ConsultaCalendarioProyectoController.GetCalendarByProjectId",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "description": "The key for staticblock",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    },
+                    "403": {
+                        "description": ":id is empty"
+                    }
+                }
+            }
+        },
         "/clonar_calendario/": {
             "post": {
                 "tags": [
@@ -268,123 +385,6 @@
                     },
                     "400": {
                         "description": "the request contains incorrect syntax"
-                    }
-                }
-            }
-        },
-        "/consulta_calendario_proyecto/nivel/{idNiv}/periodo/{idPer}": {
-            "get": {
-                "tags": [
-                    "consulta_calendario_proyecto"
-                ],
-                "description": "get ConsultaCalendarioAcademico \u0026 id y Project By Id",
-                "operationId": "ConsultaCalendarioProyectoController.GetCalendarProject",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "idNiv",
-                        "description": "Id nivel",
-                        "required": true,
-                        "type": "integer",
-                        "format": "int64"
-                    },
-                    {
-                        "in": "path",
-                        "name": ":idNiv",
-                        "description": "Id periodo",
-                        "required": true,
-                        "type": "integer",
-                        "format": "int64"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": ""
-                    },
-                    "403": {
-                        "description": ":id is empty"
-                    }
-                }
-            }
-        },
-        "/consulta_calendario_proyecto/{id}": {
-            "get": {
-                "tags": [
-                    "consulta_calendario_proyecto"
-                ],
-                "description": "get ConsultaCalendarioAcademico by id",
-                "operationId": "ConsultaCalendarioProyectoController.GetCalendarByProjectId",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "id",
-                        "description": "The key for staticblock",
-                        "required": true,
-                        "type": "string"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": ""
-                    },
-                    "403": {
-                        "description": ":id is empty"
-                    }
-                }
-            }
-        },
-        "/crear_actividad_calendario/": {
-            "post": {
-                "tags": [
-                    "crear_actividad_calendario"
-                ],
-                "description": "Agregar actividad calendario, tipo_publico y tabla de rompimiento calendario_evento_tipo_publico",
-                "operationId": "ActividadCalendarioController.PostActividadCalendario",
-                "parameters": [
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "description": "body Agregar Actividad calendario content",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/{}"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{}"
-                    },
-                    "403": {
-                        "description": "body is empty"
-                    }
-                }
-            }
-        },
-        "/crear_actividad_calendario/update/{id}": {
-            "put": {
-                "tags": [
-                    "crear_actividad_calendario"
-                ],
-                "description": "Actualiza tabla de rompimiento calendario_evento_tipo_publico segun los responsables de una Actividad",
-                "operationId": "ActividadCalendarioController.UpdateActividadResponsables",
-                "parameters": [
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "description": "body Actualizar responsables de una Actividad content",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/{}"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{}"
-                    },
-                    "403": {
-                        "description": "body is empty"
                     }
                 }
             }

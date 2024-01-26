@@ -180,7 +180,7 @@ func (c *EventoController) PutEvento() {
 func (c *EventoController) GetEvento() {
 	var eventos []map[string]interface{}
 	var alerta models.Alert
-	alertas := append([]interface{}{"Response:"})
+	alertas := append([]interface{}{"Response"})
 	persona := c.Ctx.Input.Param(":persona")
 	fmt.Println("Get Evento")
 	personaId, _ := strconv.ParseFloat(persona, 64)

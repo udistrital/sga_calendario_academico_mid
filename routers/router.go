@@ -15,7 +15,7 @@ import (
 
 func init() {
 	ns := beego.NewNamespace("/v1",
-		beego.NSNamespace("/clonar_calendario",
+		beego.NSNamespace("/clonar-calendario",
 			beego.NSInclude(
 				&controllers.ClonarCalendarioController{},
 			),
@@ -25,12 +25,12 @@ func init() {
 				&controllers.ConsultaCalendarioAcademicoController{},
 			),
 		),
-		beego.NSNamespace("/consulta_calendario_proyecto",
+		beego.NSNamespace("/calendario_proyecto",
 			beego.NSInclude(
 				&controllers.ConsultaCalendarioProyectoController{},
 			),
 		),
-		beego.NSNamespace("/crear_actividad_calendario",
+		beego.NSNamespace("/actividad_calendario",
 			beego.NSInclude(
 				&controllers.ActividadCalendarioController{},
 			),
