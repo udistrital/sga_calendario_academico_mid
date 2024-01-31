@@ -15,10 +15,10 @@
     },
     "basePath": "/v1",
     "paths": {
-        "/actividad_calendario/": {
+        "/actividad-calendario/": {
             "post": {
                 "tags": [
-                    "actividad_calendario"
+                    "actividad-calendario"
                 ],
                 "description": "Agregar actividad calendario, tipo_publico y tabla de rompimiento calendario_evento_tipo_publico",
                 "operationId": "ActividadCalendarioController.PostActividadCalendario",
@@ -43,10 +43,10 @@
                 }
             }
         },
-        "/actividad_calendario/update/{id}": {
+        "/actividad-calendario/update/{id}": {
             "put": {
                 "tags": [
-                    "actividad_calendario"
+                    "actividad-calendario"
                 ],
                 "description": "Actualiza tabla de rompimiento calendario_evento_tipo_publico segun los responsables de una Actividad",
                 "operationId": "ActividadCalendarioController.UpdateActividadResponsables",
@@ -71,10 +71,10 @@
                 }
             }
         },
-        "/calendario_academico/": {
+        "/calendario-academico/": {
             "get": {
                 "tags": [
-                    "calendario_academico"
+                    "calendario-academico"
                 ],
                 "description": "get todos los calendarios académicos junto a sus periodos correspondientes",
                 "operationId": "ConsultaCalendarioAcademicoController.GetAll",
@@ -129,38 +129,10 @@
                 }
             }
         },
-        "/calendario_academico/calendario_padre": {
-            "post": {
-                "tags": [
-                    "calendario_academico"
-                ],
-                "description": "Proyecto obtener el Id de calendario padre, crear el nuevo calendario (hijo) e inactivar el calendario padre",
-                "operationId": "ConsultaCalendarioAcademicoController.PostCalendarioHijo",
-                "parameters": [
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "description": "body crear calendario hijo content",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/{}"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{}"
-                    },
-                    "403": {
-                        "description": ":body is empty"
-                    }
-                }
-            }
-        },
-        "/calendario_academico/inhabilitar_calendario/{id}": {
+        "/calendario-academico/inhabilitar_calendario/{id}": {
             "put": {
                 "tags": [
-                    "calendario_academico"
+                    "calendario-academico"
                 ],
                 "description": "Inhabilitar Calendario",
                 "operationId": "ConsultaCalendarioAcademicoController.PutInhabilitarCalendario",
@@ -192,10 +164,38 @@
                 }
             }
         },
-        "/calendario_academico/v2/{id}": {
+        "/calendario-academico/padre": {
+            "post": {
+                "tags": [
+                    "calendario-academico"
+                ],
+                "description": "Proyecto obtener el Id de calendario padre, crear el nuevo calendario (hijo) e inactivar el calendario padre",
+                "operationId": "ConsultaCalendarioAcademicoController.PostCalendarioHijo",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "body crear calendario hijo content",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/{}"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{}"
+                    },
+                    "403": {
+                        "description": ":body is empty"
+                    }
+                }
+            }
+        },
+        "/calendario-academico/v2/{id}": {
             "get": {
                 "tags": [
-                    "calendario_academico"
+                    "calendario-academico"
                 ],
                 "description": "get obtener información calendario académico por id",
                 "operationId": "ConsultaCalendarioAcademicoController.GetCalendarInfo",
@@ -218,10 +218,10 @@
                 }
             }
         },
-        "/calendario_academico/{id}": {
+        "/calendario-academico/{id}": {
             "get": {
                 "tags": [
-                    "calendario_academico"
+                    "calendario-academico"
                 ],
                 "description": "get obtener calendario académico por id",
                 "operationId": "ConsultaCalendarioAcademicoController.GetOnePorId",
@@ -244,10 +244,10 @@
                 }
             }
         },
-        "/calendario_proyecto/nivel/{idNiv}/periodo/{idPer}": {
+        "/calendario-proyecto/nivel/{idNiv}/periodo/{idPer}": {
             "get": {
                 "tags": [
-                    "calendario_proyecto"
+                    "calendario-proyecto"
                 ],
                 "description": "get ConsultaCalendarioAcademico \u0026 id y Project By Id",
                 "operationId": "ConsultaCalendarioProyectoController.GetCalendarProject",
@@ -279,10 +279,10 @@
                 }
             }
         },
-        "/calendario_proyecto/{id}": {
+        "/calendario-proyecto/{id}": {
             "get": {
                 "tags": [
-                    "calendario_proyecto"
+                    "calendario-proyecto"
                 ],
                 "description": "get ConsultaCalendarioAcademico by id",
                 "operationId": "ConsultaCalendarioProyectoController.GetCalendarByProjectId",
@@ -305,10 +305,10 @@
                 }
             }
         },
-        "/clonar_calendario/": {
+        "/clonar-calendario/": {
             "post": {
                 "tags": [
-                    "clonar_calendario"
+                    "clonar-calendario"
                 ],
                 "description": "Clona calendario, crea tipo_evento si lo tiene, crea calendario_evento si tiene, crea calendario_evento_tipo_publico si tiene, crea tipo_publico si lo tiene",
                 "operationId": "ClonarCalendarioController.PostCalendario",
@@ -333,10 +333,10 @@
                 }
             }
         },
-        "/clonar_calendario/calendario_extension": {
+        "/clonar-calendario/extension": {
             "post": {
                 "tags": [
-                    "clonar_calendario"
+                    "clonar-calendario"
                 ],
                 "description": "Clona calendario para extension, crea tipo_evento si lo tiene, crea calendario_evento si tiene, crea calendario_evento_tipo_publico si tiene, crea tipo_publico si lo tiene",
                 "operationId": "ClonarCalendarioController.PostCalendarioExtension",
@@ -361,10 +361,10 @@
                 }
             }
         },
-        "/clonar_calendario/calendario_padre": {
+        "/clonar-calendario/padre": {
             "post": {
                 "tags": [
-                    "clonar_calendario"
+                    "clonar-calendario"
                 ],
                 "description": "Clona calendario padre, crea tipo_evento si lo tiene, crea calendario_evento si tiene, crea calendario_evento_tipo_publico si tiene, crea tipo_publico si lo tiene",
                 "operationId": "ClonarCalendarioController.PostCalendarioPadre",
@@ -515,7 +515,7 @@
     },
     "tags": [
         {
-            "name": "calendario_academico",
+            "name": "calendario-academico",
             "description": "ConsultaCalendarioAcademicoController operations for Consulta_calendario_academico\n"
         }
     ]

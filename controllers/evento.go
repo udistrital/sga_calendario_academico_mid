@@ -6,8 +6,10 @@ import (
 	"strconv"
 
 	"github.com/astaxie/beego"
-	"github.com/udistrital/sga_mid_calendario_academico/models"
 	"github.com/udistrital/utils_oas/request"
+
+	"github.com/udistrital/utils_oas/errorhandler"
+	"github.com/udistrital/utils_oas/requestresponse"
 )
 
 type EventoController struct {
@@ -30,10 +32,13 @@ func (c *EventoController) URLMapping() {
 // @Failure 403 body is empty
 // @router / [post]
 func (c *EventoController) PostEvento() {
+	defer errorhandler.HandlePanic(&c.Controller)
 
 	var Evento map[string]interface{}
-	var alerta models.Alert
-	alertas := append([]interface{}{"Response:"})
+	var response interface{} = nil
+	var success bool = false
+	var message string = ""
+	var statusCode int = 400
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &Evento); err == nil {
 
 		EventoPost := make(map[string]interface{})
@@ -72,20 +77,32 @@ func (c *EventoController) PostEvento() {
 		var resultadoEvento map[string]interface{}
 		errProduccion := request.SendJson("http://"+beego.AppConfig.String("EventoService")+"tr_evento", "POST", &resultadoEvento, EventoPost)
 		if resultadoEvento["Type"] == "error" || errProduccion != nil || resultadoEvento["Status"] == "404" || resultadoEvento["Message"] != nil {
-			alertas = append(alertas, resultadoEvento)
-			alerta.Type = "error"
-			alerta.Code = "400"
+			response = resultadoEvento
+			statusCode = 400
+			success = false
 		} else {
-			alertas = append(alertas, Evento)
+			response = Evento
+			statusCode = 200
+			success = true
 		}
 
 	} else {
-		alerta.Type = "error"
-		alerta.Code = "400"
-		alertas = append(alertas, err.Error())
+		statusCode = 400
+		message += err.Error()
+		success = false
 	}
-	alerta.Body = alertas
-	c.Data["json"] = alerta
+
+	if success {
+		c.Ctx.Output.SetStatus(200)
+		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, response)
+	} else {
+		c.Ctx.Output.SetStatus(statusCode)
+		if message != "" {
+			c.Data["json"] = requestresponse.APIResponseDTO(false, statusCode, nil, message)
+		} else {
+			c.Data["json"] = requestresponse.APIResponseDTO(false, statusCode, nil, message)
+		}
+	}
 	c.ServeJSON()
 }
 
@@ -98,10 +115,15 @@ func (c *EventoController) PostEvento() {
 // @Failure 403 :id is empty
 // @router /:id [put]
 func (c *EventoController) PutEvento() {
+	defer errorhandler.HandlePanic(&c.Controller)
+
 	idStr := c.Ctx.Input.Param(":id")
+	var response interface{} = nil
+	var success bool = false
+	var message string = ""
+	var statusCode int = 400
 	var Evento map[string]interface{}
-	var alerta models.Alert
-	alertas := append([]interface{}{"Response:"})
+
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &Evento); err == nil {
 
 		EventoPut := make(map[string]interface{})
@@ -153,20 +175,32 @@ func (c *EventoController) PutEvento() {
 		var resultadoEvento map[string]interface{}
 		errProduccion := request.SendJson("http://"+beego.AppConfig.String("EventoService")+"/tr_evento/"+idStr, "PUT", &resultadoEvento, EventoPut)
 		if resultadoEvento["Type"] == "error" || errProduccion != nil || resultadoEvento["Status"] == "404" || resultadoEvento["Message"] != nil {
-			alertas = append(alertas, resultadoEvento)
-			alerta.Type = "error"
-			alerta.Code = "400"
+			response = resultadoEvento
+			statusCode = 400
+			success = false
 		} else {
-			alertas = append(alertas, Evento)
+			response = Evento
+			statusCode = 200
+			success = true
 		}
 
 	} else {
-		alerta.Type = "error"
-		alerta.Code = "400"
-		alertas = append(alertas, err.Error())
+		statusCode = 400
+		message += err.Error()
+		success = false
 	}
-	alerta.Body = alertas
-	c.Data["json"] = alerta
+
+	if success {
+		c.Ctx.Output.SetStatus(statusCode)
+		c.Data["json"] = requestresponse.APIResponseDTO(success, statusCode, response)
+	} else {
+		c.Ctx.Output.SetStatus(statusCode)
+		if message != "" {
+			c.Data["json"] = requestresponse.APIResponseDTO(success, statusCode, response, message)
+		} else {
+			c.Data["json"] = requestresponse.APIResponseDTO(success, statusCode, response)
+		}
+	}
 	c.ServeJSON()
 }
 
@@ -178,18 +212,23 @@ func (c *EventoController) PutEvento() {
 // @Failure 403 :persona is empty
 // @router /:persona [get]
 func (c *EventoController) GetEvento() {
+	defer errorhandler.HandlePanic(&c.Controller)
+
+	var response interface{} = nil
+	var success bool = false
+	var message string = ""
+	var statusCode int = 400
 	var eventos []map[string]interface{}
-	var alerta models.Alert
-	alertas := append([]interface{}{"Response"})
+
 	persona := c.Ctx.Input.Param(":persona")
 	fmt.Println("Get Evento")
 	personaId, _ := strconv.ParseFloat(persona, 64)
 	errEventos := request.GetJson("http://"+beego.AppConfig.String("EventoService")+"/tr_evento/"+persona, &eventos)
 	if errEventos != nil || eventos[0]["CalendarioEvento"] == nil {
-		alertas = append(alertas, errEventos)
-		alerta.Body = alertas
-		alerta.Type = "error"
-		alerta.Code = "400"
+		success = false
+		statusCode = 400
+		message += "Error: errEventos es nil"
+
 	} else {
 		fmt.Println("paso")
 		for _, evento := range eventos {
@@ -207,10 +246,9 @@ func (c *EventoController) GetEvento() {
 					var encargadoEvento map[string]interface{}
 					errEncargado := request.GetJson("http://"+beego.AppConfig.String("TercerosService")+"/tercero/"+fmt.Sprintf("%.f", encargado["EncargadoId"].(float64)), &encargadoEvento)
 					if encargadoEvento["Type"] == "error" || errEncargado != nil {
-						alertas = append(alertas, errEncargado)
-						alerta.Body = alertas
-						alerta.Type = "error"
-						alerta.Code = "400"
+						success = false
+						statusCode = 400
+						message += "Error: errEncargado es nil"
 					} else {
 						encargado["Nombre"] = encargadoEvento["PrimerNombre"].(string) + " " + encargadoEvento["SegundoNombre"].(string) + " " + encargadoEvento["PrimerApellido"].(string) + " " + encargadoEvento["SegundoApellido"].(string)
 					}
@@ -221,10 +259,9 @@ func (c *EventoController) GetEvento() {
 				var dependencia []map[string]interface{}
 				errDependencia := request.GetJson("http://"+beego.AppConfig.String("OikosService")+"dependencia_tipo_dependencia/?query=DependenciaId__Id:"+fmt.Sprintf("%.f", tipoEvento["DependenciaId"].(float64)), &dependencia)
 				if dependencia == nil || errDependencia != nil {
-					alertas = append(alertas, errDependencia)
-					alerta.Body = alertas
-					alerta.Type = "error"
-					alerta.Code = "400"
+					success = false
+					message += "Error: errDependencia es nil"
+					statusCode = 400
 				} else {
 					calendarioEvento["TipoDependenciaId"] = dependencia[0]["TipoDependenciaId"]
 					calendarioEvento["DependenciaId"] = dependencia[0]["DependenciaId"]
@@ -235,10 +272,9 @@ func (c *EventoController) GetEvento() {
 				var periodo map[string]interface{}
 				errPeriodo := request.GetJson("http://"+beego.AppConfig.String("CoreService")+"periodo/"+fmt.Sprintf("%.f", calendarioEvento["PeriodoId"].(float64)), &periodo)
 				if periodo == nil || errPeriodo != nil {
-					alertas = append(alertas, errPeriodo)
-					alerta.Body = alertas
-					alerta.Type = "error"
-					alerta.Code = "400"
+					success = false
+					message += "Error: errPeriodo es nil"
+					statusCode = 400
 				} else {
 					evento["Periodo"] = periodo
 				}
@@ -250,9 +286,21 @@ func (c *EventoController) GetEvento() {
 
 			}
 		}
-		alerta.Body = eventos
+		response = eventos
+		success = true
+		statusCode = 200
 	}
-	c.Data["json"] = alerta
+
+	c.Ctx.Output.SetStatus(statusCode)
+	if success {
+		c.Data["json"] = requestresponse.APIResponseDTO(success, statusCode, response)
+	} else {
+		if message != "" {
+			c.Data["json"] = requestresponse.APIResponseDTO(success, statusCode, response, message)
+		} else {
+			c.Data["json"] = requestresponse.APIResponseDTO(success, statusCode, response)
+		}
+	}
 	c.ServeJSON()
 }
 
@@ -264,19 +312,43 @@ func (c *EventoController) GetEvento() {
 // @Failure 403 :id is empty
 // @router /:id [delete]
 func (c *EventoController) DeleteEvento() {
+	defer errorhandler.HandlePanic(&c.Controller)
+
+	var response interface{} = nil
+	var success bool = false
+	var message string = ""
+	var statusCode int = 400
 	var eventoDeleted map[string]interface{}
-	var alerta models.Alert
-	alertas := append([]interface{}{"Response:"})
 	id := c.Ctx.Input.Param(":id")
 	errEvento := request.SendJson(fmt.Sprintf("http://"+beego.AppConfig.String("EventoService")+"/tr_evento/"+id), "DELETE", &eventoDeleted, nil)
 	if errEvento != nil || eventoDeleted["Message"] != nil {
-		alertas = append(alertas, errEvento)
-		alerta.Body = alertas
-		alerta.Type = "error"
-		alerta.Code = "400"
+		success = false
+		message += "Error: errEvento"
+		statusCode = 400
 	} else {
-		alerta.Body = eventoDeleted
+		cadena, ok := eventoDeleted["Type"].(string)
+		if ok {
+			if cadena == "error" {
+				success = false
+				message += eventoDeleted["Body"].(string)
+				statusCode = 400
+			} else {
+				success = true
+				statusCode = 200
+				response = eventoDeleted
+			}
+		} else {
+			success = false
+			statusCode = 400
+			message += "Error: error al convertir la cadena type a string"
+		}
+
 	}
-	c.Data["json"] = alerta
+	c.Ctx.Output.SetStatus(statusCode)
+	if message != "" {
+		c.Data["json"] = requestresponse.APIResponseDTO(success, statusCode, response, message)
+	} else {
+		c.Data["json"] = requestresponse.APIResponseDTO(success, statusCode, response)
+	}
 	c.ServeJSON()
 }

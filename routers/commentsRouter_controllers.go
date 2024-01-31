@@ -37,7 +37,7 @@ func init() {
     beego.GlobalControllerRouter["github.com/udistrital/sga_mid_calendario_academico/controllers:ClonarCalendarioController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_mid_calendario_academico/controllers:ClonarCalendarioController"],
         beego.ControllerComments{
             Method: "PostCalendarioExtension",
-            Router: "/calendario_extension",
+            Router: "/extension",
             AllowHTTPMethods: []string{"post"},
             MethodParams: param.Make(),
             Filters: nil,
@@ -46,7 +46,7 @@ func init() {
     beego.GlobalControllerRouter["github.com/udistrital/sga_mid_calendario_academico/controllers:ClonarCalendarioController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_mid_calendario_academico/controllers:ClonarCalendarioController"],
         beego.ControllerComments{
             Method: "PostCalendarioPadre",
-            Router: "/calendario_padre",
+            Router: "/padre",
             AllowHTTPMethods: []string{"post"},
             MethodParams: param.Make(),
             Filters: nil,
@@ -72,18 +72,18 @@ func init() {
 
     beego.GlobalControllerRouter["github.com/udistrital/sga_mid_calendario_academico/controllers:ConsultaCalendarioAcademicoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_mid_calendario_academico/controllers:ConsultaCalendarioAcademicoController"],
         beego.ControllerComments{
-            Method: "PostCalendarioHijo",
-            Router: "/calendario_padre",
-            AllowHTTPMethods: []string{"post"},
+            Method: "PutInhabilitarCalendario",
+            Router: "/inhabilitar_calendario/:id",
+            AllowHTTPMethods: []string{"put"},
             MethodParams: param.Make(),
             Filters: nil,
             Params: nil})
 
     beego.GlobalControllerRouter["github.com/udistrital/sga_mid_calendario_academico/controllers:ConsultaCalendarioAcademicoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_mid_calendario_academico/controllers:ConsultaCalendarioAcademicoController"],
         beego.ControllerComments{
-            Method: "PutInhabilitarCalendario",
-            Router: "/inhabilitar_calendario/:id",
-            AllowHTTPMethods: []string{"put"},
+            Method: "PostCalendarioHijo",
+            Router: "/padre",
+            AllowHTTPMethods: []string{"post"},
             MethodParams: param.Make(),
             Filters: nil,
             Params: nil})

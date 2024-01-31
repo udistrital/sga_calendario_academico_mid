@@ -3,10 +3,13 @@ package controllers
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
+
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
+	"github.com/udistrital/utils_oas/errorhandler"
 	"github.com/udistrital/utils_oas/request"
-	"strconv"
+	"github.com/udistrital/utils_oas/requestresponse"
 )
 
 type ActividadCalendarioController struct {
@@ -26,6 +29,7 @@ func (c *ActividadCalendarioController) URLMapping() {
 // @Failure 403 body is empty
 // @router / [post]
 func (c *ActividadCalendarioController) PostActividadCalendario() {
+	defer errorhandler.HandlePanic(&c.Controller)
 
 	//Almacena el json que se trae desde el cliente
 	var actividadCalendario map[string]interface{}
@@ -43,13 +47,13 @@ func (c *ActividadCalendarioController) PostActividadCalendario() {
 				IdActividad = actividadCalendarioPost["Id"]
 			} else {
 				logs.Error(errActividad)
-				c.Data["json"] = map[string]interface{}{"Code": "400", "Body": errActividad.Error(), "Type": "error"}
+				c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errActividad.Error())
 				c.Data["system"] = actividadCalendarioPost
 				c.Abort("400")
 			}
 		} else {
 			logs.Error(errActividad)
-			c.Data["json"] = map[string]interface{}{"Code": "400", "Body": errActividad.Error(), "Type": "error"}
+			c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errActividad.Error())
 			c.Data["system"] = actividadCalendarioPost
 			c.Abort("400")
 		}
@@ -69,21 +73,26 @@ func (c *ActividadCalendarioController) PostActividadCalendario() {
 
 			if errActividadPersona == nil && fmt.Sprintf("%v", actividadPersonaPost["System"]) != "map[]" && actividadPersonaPost["Id"] != nil {
 				if actividadPersonaPost["Status"] != 400 {
-					//c.Data["json"] = actividadPersonaPost
-					c.Data["json"] = actividadCalendarioPost
+					c.Ctx.Output.SetStatus(200)
+					c.Data["json"] = requestresponse.APIResponseDTO(true, 200, actividadCalendarioPost)
 				} else {
 					var resultado2 map[string]interface{}
 					request.SendJson(fmt.Sprintf("http://"+beego.AppConfig.String("EventoService")+"/calendario_evento/%.f", actividadCalendarioPost["Id"]), "DELETE", &resultado2, nil)
 					logs.Error(errActividadPersona)
+					c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil)
 					c.Data["system"] = actividadPersonaPost
 					c.Abort("400")
 				}
 			} else {
 				logs.Error(errActividadPersona)
+				c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil)
 				c.Data["system"] = actividadPersonaPost
 				c.Abort("400")
 			}
 		}
+	} else {
+		c.Ctx.Output.SetStatus(404)
+		c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, err.Error())
 	}
 	c.ServeJSON()
 }
@@ -96,6 +105,8 @@ func (c *ActividadCalendarioController) PostActividadCalendario() {
 // @Failure 403 body is empty
 // @router /update/:id [put]
 func (c *ActividadCalendarioController) UpdateActividadResponsables() {
+	defer errorhandler.HandlePanic(&c.Controller)
+
 	var recibido map[string]interface{}
 	var guardados []map[string]interface{}
 	var actualizados []map[string]interface{}
@@ -128,29 +139,32 @@ func (c *ActividadCalendarioController) UpdateActividadResponsables() {
 						actualizados = append(actualizados, auxUpdate)
 					} else {
 						logs.Error(errPost)
-						c.Data["json"] = map[string]interface{}{"Code": "400", "Body": errPost.Error(), "Type": "error"}
+						c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errPost.Error())
 						c.Data["system"] = errPost
-						c.Abort("400")
+						c.Ctx.Output.SetStatus(400)
+						c.ServeJSON()
+						return
 					}
 				}
-				c.Data["json"] = actualizados
+				c.Ctx.Output.SetStatus(200)
+				c.Data["json"] = requestresponse.APIResponseDTO(false, 400, actualizados)
 			} else {
 				logs.Error(errBorrado)
-				c.Data["json"] = map[string]interface{}{"Code": "400", "Body": errBorrado.Error(), "Type": "error"}
+				c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errBorrado.Error())
 				c.Data["system"] = errBorrado
-				c.Abort("400")
+				c.Ctx.Output.SetStatus(400)
 			}
 		} else {
 			logs.Error(errConsulta)
-			c.Data["json"] = map[string]interface{}{"Code": "400", "Body": errConsulta.Error(), "Type": "error"}
+			c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errConsulta.Error())
 			c.Data["system"] = errConsulta
-			c.Abort("400")
+			c.Ctx.Output.SetStatus(400)
 		}
 	} else {
 		logs.Error(err)
-		c.Data["json"] = map[string]interface{}{"Code": "400", "Body": err.Error(), "Type": "error"}
+		c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, err.Error())
 		c.Data["system"] = err
-		c.Abort("400")
+		c.Ctx.Output.SetStatus(400)
 	}
 	c.ServeJSON()
 }

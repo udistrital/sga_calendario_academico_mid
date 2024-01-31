@@ -7,8 +7,9 @@ import (
 	"strings"
 
 	"github.com/astaxie/beego"
-	"github.com/udistrital/sga_mid_calendario_academico/models"
+	"github.com/udistrital/utils_oas/errorhandler"
 	"github.com/udistrital/utils_oas/request"
+	"github.com/udistrital/utils_oas/requestresponse"
 )
 
 type ConsultaCalendarioProyectoController struct {
@@ -29,12 +30,11 @@ func (c *ConsultaCalendarioProyectoController) URLMapping() {
 // @Failure 403 :id is empty
 // @router /:id [get]
 func (c *ConsultaCalendarioProyectoController) GetCalendarByProjectId() {
+	defer errorhandler.HandlePanic(&c.Controller)
 
 	var calendarios []map[string]interface{}
 	var CalendarioId string = "0"
 	var Calendario map[string]interface{}
-	var alerta models.Alert
-	alertas := append([]interface{}{"Response:"})
 	idStr, _ := strconv.Atoi(c.Ctx.Input.Param(":id"))
 
 	errCalendarios := request.GetJson("http://"+beego.AppConfig.String("EventoService")+"calendario?query=Activo:true&limit=0&sortby=Id&order=desc", &calendarios)
@@ -73,13 +73,11 @@ func (c *ConsultaCalendarioProyectoController) GetCalendarByProjectId() {
 		Calendario = map[string]interface{}{
 			"CalendarioId": CalendarioId,
 		}
-		c.Data["json"] = Calendario
+		c.Ctx.Output.SetStatus(200)
+		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, Calendario)
 	} else {
-		alertas = append(alertas, errCalendarios.Error())
-		alerta.Code = "400"
-		alerta.Type = "error"
-		alerta.Body = alertas
-		c.Data["json"] = alerta
+		c.Ctx.Output.SetStatus(400)
+		c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errCalendarios.Error())
 	}
 
 	c.ServeJSON()
@@ -94,6 +92,7 @@ func (c *ConsultaCalendarioProyectoController) GetCalendarByProjectId() {
 // @Failure 403 :id is empty
 // @router /nivel/:idNiv/periodo/:idPer [get]
 func (c *ConsultaCalendarioProyectoController) GetCalendarProject() {
+	defer errorhandler.HandlePanic(&c.Controller)
 
 	var calendarios []map[string]interface{}
 	var calendarioEventos []map[string]interface{}
@@ -104,7 +103,6 @@ func (c *ConsultaCalendarioProyectoController) GetCalendarProject() {
 	/*var calendario map[string]interface{}
 	var proyecto map[string]interface{}
 	var proyectoRetorno []map[string]interface{} */
-	var alerta models.Alert
 	var proyectosArrMap []map[string]interface{}
 	/* var procesoArr []string
 	var calendariosArrMap []map[string]interface{}
@@ -113,7 +111,6 @@ func (c *ConsultaCalendarioProyectoController) GetCalendarProject() {
 	var proyectosFilter []map[string]interface{}
 	var proyectosArr map[string]interface{}
 	var salidaFilter []map[string]interface{} */
-	alertas := append([]interface{}{"Response:"})
 	idNiv := c.Ctx.Input.Param(":idNiv")
 	idPer := c.Ctx.Input.Param(":idPer")
 
@@ -259,35 +256,27 @@ func (c *ConsultaCalendarioProyectoController) GetCalendarProject() {
 							}
 						}
 					}
-
-					c.Data["json"] = proyectosArrMap
+					c.Ctx.Output.SetStatus(200)
+					c.Data["json"] = requestresponse.APIResponseDTO(true, 200, proyectosArrMap)
 
 				} else {
-					alertas = append(alertas, errCalendarios.Error())
-					alerta.Code = "400"
-					alerta.Type = "error"
-					alerta.Body = alertas
-					c.Data["json"] = alerta
+					c.Ctx.Output.SetStatus(400)
+					c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errCalendarios.Error())
 				}
 
 			} else {
 				proyectos = []map[string]interface{}{}
-				c.Data["json"] = proyectos
+				c.Ctx.Output.SetStatus(200)
+				c.Data["json"] = requestresponse.APIResponseDTO(true, 200, proyectos)
 			}
 
 		} else {
-			alertas = append(alertas, errProyectosH.Error())
-			alerta.Code = "400"
-			alerta.Type = "error"
-			alerta.Body = alertas
-			c.Data["json"] = alerta
+			c.Ctx.Output.SetStatus(400)
+			c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errProyectosH.Error())
 		}
 	} else {
-		alertas = append(alertas, errProyectosP.Error())
-		alerta.Code = "400"
-		alerta.Type = "error"
-		alerta.Body = alertas
-		c.Data["json"] = alerta
+		c.Ctx.Output.SetStatus(400)
+		c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errProyectosP.Error())
 	}
 
 	c.ServeJSON()
