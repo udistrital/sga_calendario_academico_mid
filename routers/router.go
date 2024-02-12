@@ -8,29 +8,32 @@
 package routers
 
 import (
-	"github.com/udistrital/sga_mid_calendario_academico/controllers"
-
 	"github.com/astaxie/beego"
+	"github.com/udistrital/sga_mid_calendario_academico/controllers"
+	"github.com/udistrital/utils_oas/errorhandler"
 )
 
 func init() {
+
+	beego.ErrorController(&errorhandler.ErrorHandlerController{})
+
 	ns := beego.NewNamespace("/v1",
-		beego.NSNamespace("/clonar_calendario",
+		beego.NSNamespace("/clonar-calendario",
 			beego.NSInclude(
 				&controllers.ClonarCalendarioController{},
 			),
 		),
-		beego.NSNamespace("/calendario_academico",
+		beego.NSNamespace("/calendario-academico",
 			beego.NSInclude(
 				&controllers.ConsultaCalendarioAcademicoController{},
 			),
 		),
-		beego.NSNamespace("/consulta_calendario_proyecto",
+		beego.NSNamespace("/calendario-proyecto",
 			beego.NSInclude(
 				&controllers.ConsultaCalendarioProyectoController{},
 			),
 		),
-		beego.NSNamespace("/crear_actividad_calendario",
+		beego.NSNamespace("/actividad-calendario",
 			beego.NSInclude(
 				&controllers.ActividadCalendarioController{},
 			),
