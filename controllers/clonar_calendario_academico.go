@@ -6,8 +6,10 @@ import (
 	"fmt"
 
 	"github.com/astaxie/beego"
-	"github.com/udistrital/sga_mid_calendario_academico/models"
 	"github.com/udistrital/utils_oas/request"
+	"github.com/udistrital/utils_oas/requestresponse"
+
+	"github.com/udistrital/utils_oas/errorhandler"
 )
 
 type ClonarCalendarioController struct {
@@ -28,6 +30,7 @@ func (c *ClonarCalendarioController) URLMapping() {
 // @Failure 400 the request contains incorrect syntax
 // @router / [post]
 func (c *ClonarCalendarioController) PostCalendario() {
+	defer errorhandler.HandlePanic(&c.Controller)
 
 	var calendario map[string]interface{}
 	var calendarioParam []map[string]interface{}
@@ -38,9 +41,8 @@ func (c *ClonarCalendarioController) PostCalendario() {
 	var resultadoPost map[string]interface{}
 	var resultadoPostResponsable map[string]interface{}
 	var errCalendarioParam = errors.New("")
-	var alerta models.Alert
 	var errorGetAll bool
-	alertas := append([]interface{}{"Data:"})
+	var message string
 
 	var dataPost map[string]interface{}
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &dataPost); err == nil {
@@ -122,111 +124,69 @@ func (c *ClonarCalendarioController) PostCalendario() {
 																				}
 																			} else {
 																				errorGetAll = true
-																				alertas = append(alertas, errTipoPublico.Error())
-																				alerta.Code = "400"
-																				alerta.Type = "error"
-																				alerta.Body = alertas
-																				c.Data["json"] = map[string]interface{}{"Data": alerta}
+																				message += errTipoPublico.Error()
 																			}
 																		}
 																	}
 																} else {
 																	errorGetAll = true
-																	alertas = append(alertas, errCalendarioEventoTipoPublico.Error())
-																	alerta.Code = "400"
-																	alerta.Type = "error"
-																	alerta.Body = alertas
-																	c.Data["json"] = map[string]interface{}{"Data": alerta}
+																	message += errCalendarioEventoTipoPublico.Error()
 																}
 
 															}
 														} else {
 															errorGetAll = true
-															alertas = append(alertas, errCalendarioEventoPost.Error())
-															alerta.Code = "400"
-															alerta.Type = "error"
-															alerta.Body = alertas
-															c.Data["json"] = map[string]interface{}{"Data": alerta}
+															message += errCalendarioEventoPost.Error()
 														}
 
 													}
 												}
 											} else {
 												errorGetAll = true
-												alertas = append(alertas, errCalendarioEvento.Error())
-												alerta.Code = "400"
-												alerta.Type = "error"
-												alerta.Body = alertas
-												c.Data["json"] = map[string]interface{}{"Data": alerta}
+												message += errCalendarioEvento.Error()
 											}
 										}
 									} else {
 										errorGetAll = true
-										alertas = append(alertas, errTipoEventoPost.Error())
-										alerta.Code = "400"
-										alerta.Type = "error"
-										alerta.Body = alertas
-										c.Data["json"] = map[string]interface{}{"Data": alerta}
+										message += errTipoEventoPost.Error()
 									}
 
 								}
 
 							} else {
 								errorGetAll = true
-								alertas = append(alertas, tipoEvento[0])
-								alerta.Code = "200"
-								alerta.Type = "OK"
-								alerta.Body = alertas
-								c.Data["json"] = map[string]interface{}{"Data": alerta}
+								message += "No data found tipoEvento[0]"
 							}
 						} else {
 							errorGetAll = true
-							alertas = append(alertas, errTipoEvento.Error())
-							alerta.Code = "400"
-							alerta.Type = "error"
-							alerta.Body = alertas
-							c.Data["json"] = map[string]interface{}{"Data": alerta}
+							message += errTipoEvento.Error()
 						}
 					} else {
 						errorGetAll = true
-						alertas = append(alertas, calendarioParam[0])
-						alerta.Code = "200"
-						alerta.Type = "OK"
-						alerta.Body = alertas
-						c.Data["json"] = map[string]interface{}{"Data": alerta}
+						message += "No data found calendarioParam[0]"
 					}
 				} else {
 					errorGetAll = true
-					alertas = append(alertas, errCalendarioParam.Error())
-					alerta.Code = "400"
-					alerta.Type = "error"
-					alerta.Body = alertas
-					c.Data["json"] = map[string]interface{}{"Data": alerta}
+					message += errCalendarioParam.Error()
 				}
 			} else {
 				errorGetAll = true
-				alertas = append(alertas, "No data found")
-				alerta.Code = "404"
-				alerta.Type = "error"
-				alerta.Body = alertas
-				c.Data["json"] = map[string]interface{}{"Data": alerta}
+				message += "No data found"
 			}
 		} else {
 			errorGetAll = true
-			alertas = append(alertas, errCalendarioParam.Error())
-			alerta.Code = "400"
-			alerta.Type = "error"
-			alerta.Body = alertas
-			c.Data["json"] = map[string]interface{}{"Data": alerta}
+			message += errCalendarioParam.Error()
 		}
 
 	}
 	if !errorGetAll {
-		alertas = append(alertas, calendario)
-		alerta.Code = "200"
-		alerta.Type = "OK"
-		alerta.Body = alertas
-		c.Data["json"] = map[string]interface{}{"Data": alerta}
+		c.Ctx.Output.SetStatus(200)
+		response := requestresponse.APIResponseDTO(true, 200, calendario)
+		c.Data["json"] = response
+	} else {
+		c.Ctx.Output.SetStatus(400)
+		response := requestresponse.APIResponseDTO(false, 400, nil, message)
+		c.Data["json"] = response
 	}
 	c.ServeJSON()
 
@@ -238,8 +198,9 @@ func (c *ClonarCalendarioController) PostCalendario() {
 // @Param	body		body 	{}	true		"body id calendario content"
 // @Success 200 {}
 // @Failure 400 the request contains incorrect syntax
-// @router /calendario_padre [post]
+// @router /padre [post]
 func (c *ClonarCalendarioController) PostCalendarioPadre() {
+	defer errorhandler.HandlePanic(&c.Controller)
 
 	var calendario map[string]interface{}
 	var calendarioParam []map[string]interface{}
@@ -248,9 +209,9 @@ func (c *ClonarCalendarioController) PostCalendarioPadre() {
 	var resultadoPost map[string]interface{}
 	var resultado map[string]interface{}
 	var errCalendarioParam = errors.New("")
-	var alerta models.Alert
 	var errorGetAll bool
-	alertas := append([]interface{}{"Response:"})
+	var message string
+	var statusCode int = 200
 
 	var dataPost map[string]interface{}
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &dataPost); err == nil {
@@ -299,52 +260,34 @@ func (c *ClonarCalendarioController) PostCalendarioPadre() {
 																fmt.Println("calendario_evento nuevo: ", resultadoPost["Id"])
 															} else {
 																errorGetAll = true
-																alertas = append(alertas, errCalendarioEventoPost.Error())
-																alerta.Code = "400"
-																alerta.Type = "error"
-																alerta.Body = alertas
-																c.Data["json"] = map[string]interface{}{"Response": alerta}
+																statusCode = 400
+																message += errCalendarioEventoPost.Error()
 															}
 														} else {
 															errorGetAll = true
-															alertas = append(alertas, "No data found")
-															alerta.Code = "404"
-															alerta.Type = "error"
-															alerta.Body = alertas
-															c.Data["json"] = map[string]interface{}{"Response": alerta}
+															statusCode = 404
+															message += "No data found"
 														}
 													}
 												} else {
 													errorGetAll = true
-													alertas = append(alertas, errCalendarioEvento.Error())
-													alerta.Code = "400"
-													alerta.Type = "error"
-													alerta.Body = alertas
-													c.Data["json"] = map[string]interface{}{"Response": alerta}
+													statusCode = 400
+													message += errCalendarioEvento.Error()
 												}
 											} else {
 												errorGetAll = true
-												alertas = append(alertas, "No data found")
-												alerta.Code = "404"
-												alerta.Type = "error"
-												alerta.Body = alertas
-												c.Data["json"] = map[string]interface{}{"Response": alerta}
+												statusCode = 404
+												message += "No data found"
 											}
 										} else {
 											errorGetAll = true
-											alertas = append(alertas, errTipoEventoPost.Error())
-											alerta.Code = "400"
-											alerta.Type = "error"
-											alerta.Body = alertas
-											c.Data["json"] = map[string]interface{}{"Response": alerta}
+											statusCode = 400
+											message += errTipoEventoPost.Error()
 										}
 									} else {
 										errorGetAll = true
-										alertas = append(alertas, "No data found")
-										alerta.Code = "404"
-										alerta.Type = "error"
-										alerta.Body = alertas
-										c.Data["json"] = map[string]interface{}{"Response": alerta}
+										statusCode = 404
+										message += "No data found"
 									}
 
 								}
@@ -353,67 +296,46 @@ func (c *ClonarCalendarioController) PostCalendarioPadre() {
 								}
 							} else {
 								errorGetAll = true
-								alertas = append(alertas, "No data found")
-								alerta.Code = "404"
-								alerta.Type = "error"
-								alerta.Body = alertas
-								c.Data["json"] = map[string]interface{}{"Response": alerta}
+								statusCode = 404
+								message += "No data found"
 							}
 						} else {
 							errorGetAll = true
-							alertas = append(alertas, errTipoEvento.Error())
-							alerta.Code = "400"
-							alerta.Type = "error"
-							alerta.Body = alertas
-							c.Data["json"] = map[string]interface{}{"Response": alerta}
+							statusCode = 400
+							message = errTipoEvento.Error()
 						}
 					} else {
 						errorGetAll = true
-						alertas = append(alertas, "No data found")
-						alerta.Code = "404"
-						alerta.Type = "error"
-						alerta.Body = alertas
-						c.Data["json"] = map[string]interface{}{"Response": alerta}
+						statusCode = 404
+						message += "No data found"
 					}
 				} else {
 					errorGetAll = true
-					alertas = append(alertas, errCalendarioParam.Error())
-					alerta.Code = "400"
-					alerta.Type = "error"
-					alerta.Body = alertas
-					c.Data["json"] = map[string]interface{}{"Response": alerta}
+					statusCode = 400
+					message += errCalendarioParam.Error()
 				}
 			} else {
 				errorGetAll = true
-				alertas = append(alertas, "No data found")
-				alerta.Code = "404"
-				alerta.Type = "error"
-				alerta.Body = alertas
-				c.Data["json"] = map[string]interface{}{"Response": alerta}
+				statusCode = 404
+				message += "No data found"
 			}
 		} else {
 			errorGetAll = true
-			alertas = append(alertas, errCalendario.Error())
-			alerta.Code = "400"
-			alerta.Type = "error"
-			alerta.Body = alertas
-			c.Data["json"] = map[string]interface{}{"Response": alerta}
+			statusCode = 400
+			message += errCalendario.Error()
 		}
 	} else {
 		errorGetAll = true
-		alertas = append(alertas, err.Error())
-		alerta.Code = "400"
-		alerta.Type = "error"
-		alerta.Body = alertas
-		c.Data["json"] = map[string]interface{}{"Response": alerta}
+		statusCode = 400
+		message += err.Error()
 	}
 
 	if !errorGetAll {
-		alertas = append(alertas, resultado)
-		alerta.Code = "200"
-		alerta.Type = "OK"
-		alerta.Body = alertas
-		c.Data["json"] = map[string]interface{}{"Response": alerta}
+		c.Ctx.Output.SetStatus(statusCode)
+		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, resultado)
+	} else {
+		c.Ctx.Output.SetStatus(statusCode)
+		c.Data["json"] = requestresponse.APIResponseDTO(false, statusCode, nil, message)
 	}
 	c.ServeJSON()
 }
@@ -424,8 +346,9 @@ func (c *ClonarCalendarioController) PostCalendarioPadre() {
 // @Param	body		body 	{}	true		"body id calendario content"
 // @Success 200 {}
 // @Failure 400 the request contains incorrect syntax
-// @router /calendario_extension [post]
+// @router /extension [post]
 func (c *ClonarCalendarioController) PostCalendarioExtension() {
+	defer errorhandler.HandlePanic(&c.Controller)
 
 	var CalendarioExtension map[string]interface{}
 	var CalendarioPadre map[string]interface{}
@@ -508,26 +431,26 @@ func (c *ClonarCalendarioController) PostCalendarioExtension() {
 																			//errorGetAll = true
 																			fmt.Println("error get tipo_publico", errTipoPublico)
 																			c.Ctx.Output.SetStatus(404)
-																			c.Data["json"] = map[string]interface{}{"Success": true, "Status": "404", "Message": "Bad", "Data": errTipoPublico}
+																			c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, errTipoPublico.Error())
 																		}
 																	}
 
 																	c.Ctx.Output.SetStatus(200)
-																	c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Query successful", "Data": "ok all fine"}
+																	c.Data["json"] = requestresponse.APIResponseDTO(true, 200, nil)
 
 																}
 															} else {
 																//errorGetAll = true
 																fmt.Println("error get calend_evento_tipo_pub", errCalendarioEventoTipoPublico)
 																c.Ctx.Output.SetStatus(404)
-																c.Data["json"] = map[string]interface{}{"Success": true, "Status": "404", "Message": "Bad", "Data": errCalendarioEventoTipoPublico}
+																c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, errCalendarioEventoTipoPublico.Error())
 															}
 														}
 													} else {
 														//errorGetAll = true
 														fmt.Println("error post calend event", errCalendarioEventoPost)
 														c.Ctx.Output.SetStatus(400)
-														c.Data["json"] = map[string]interface{}{"Success": true, "Status": "400", "Message": "Bad", "Data": errCalendarioEventoPost}
+														c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errCalendarioEventoPost.Error())
 													}
 
 												}
@@ -536,47 +459,47 @@ func (c *ClonarCalendarioController) PostCalendarioExtension() {
 											//errorGetAll = true
 											fmt.Println("error get calend_evento", errCalendarioEvento)
 											c.Ctx.Output.SetStatus(404)
-											c.Data["json"] = map[string]interface{}{"Success": true, "Status": "404", "Message": "Bad", "Data": errCalendarioEvento}
+											c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, errCalendarioEvento.Error())
 										}
 									}
 								} else {
 									//errorGetAll = true
 									fmt.Println("error put evento", errTipoEventoPost)
 									c.Ctx.Output.SetStatus(404)
-									c.Data["json"] = map[string]interface{}{"Success": true, "Status": "404", "Message": "Bad", "Data": errTipoEventoPost}
+									c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, errTipoEventoPost.Error())
 								}
 
 							}
 
 						} else {
 							c.Ctx.Output.SetStatus(200)
-							c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Query successful", "Data": "ok pero no eventos"}
+							c.Data["json"] = requestresponse.APIResponseDTO(true, 200, nil, "ok pero no eventos")
 						}
 					} else {
 						fmt.Println("error get eventos", errTipoEvento)
 						c.Ctx.Output.SetStatus(404)
-						c.Data["json"] = map[string]interface{}{"Success": true, "Status": "404", "Message": "Bad", "Data": errTipoEvento}
+						c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, errTipoEvento.Error())
 					}
 
 				} else {
 					fmt.Println("error put calend padre extension", errCalendarioExtCrear)
 					c.Ctx.Output.SetStatus(400)
-					c.Data["json"] = map[string]interface{}{"Success": true, "Status": "400", "Message": "Bad", "Data": errCalendarioExtCrear}
+					c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errCalendarioExtCrear.Error())
 				}
 			} else {
 				fmt.Println("error get calend padre")
 				c.Ctx.Output.SetStatus(404)
-				c.Data["json"] = map[string]interface{}{"Success": true, "Status": "404", "Message": "Bad", "Data": nil}
+				c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil)
 			}
 		} else {
 			fmt.Println("error get calend padre", errCalendarioPadre)
 			c.Ctx.Output.SetStatus(404)
-			c.Data["json"] = map[string]interface{}{"Success": true, "Status": "404", "Message": "Bad", "Data": errCalendarioPadre}
+			c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, errCalendarioPadre.Error())
 		}
 	} else {
 		fmt.Println("error body")
 		c.Ctx.Output.SetStatus(404)
-		c.Data["json"] = map[string]interface{}{"Success": true, "Status": "404", "Message": "Bad", "Data": nil}
+		c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil)
 	}
 
 	c.ServeJSON()

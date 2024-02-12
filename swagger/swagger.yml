@@ -1,0 +1,342 @@
+swagger: "2.0"
+info:
+  title: beego Test API
+  description: beego has a very cool tools to autogenerate documents for your API
+  version: 1.0.0
+  termsOfService: http://beego.me/
+  contact:
+    email: astaxie@gmail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+basePath: /v1
+paths:
+  /actividad-calendario/:
+    post:
+      tags:
+      - actividad-calendario
+      description: Agregar actividad calendario, tipo_publico y tabla de rompimiento calendario_evento_tipo_publico
+      operationId: ActividadCalendarioController.PostActividadCalendario
+      parameters:
+      - in: body
+        name: body
+        description: body Agregar Actividad calendario content
+        required: true
+        schema:
+          $ref: '#/definitions/{}'
+      responses:
+        "200":
+          description: '{}'
+        "403":
+          description: body is empty
+  /actividad-calendario/update/{id}:
+    put:
+      tags:
+      - actividad-calendario
+      description: Actualiza tabla de rompimiento calendario_evento_tipo_publico segun los responsables de una Actividad
+      operationId: ActividadCalendarioController.UpdateActividadResponsables
+      parameters:
+      - in: body
+        name: body
+        description: body Actualizar responsables de una Actividad content
+        required: true
+        schema:
+          $ref: '#/definitions/{}'
+      responses:
+        "200":
+          description: '{}'
+        "403":
+          description: body is empty
+  /calendario-academico/:
+    get:
+      tags:
+      - calendario-academico
+      description: get todos los calendarios académicos junto a sus periodos correspondientes
+      operationId: ConsultaCalendarioAcademicoController.GetAll
+      parameters:
+      - in: query
+        name: query
+        description: Filter. e.g. col1:v1,col2:v2 ...
+        type: string
+      - in: query
+        name: fields
+        description: Fields returned. e.g. col1,col2 ...
+        type: string
+      - in: query
+        name: sortby
+        description: Sorted-by fields. e.g. col1,col2 ...
+        type: string
+      - in: query
+        name: order
+        description: Order corresponding to each sortby field, if single value, apply to all sortby fields. e.g. desc,asc ...
+        type: string
+      - in: query
+        name: limit
+        description: Limit the size of result set. Must be an integer
+        type: string
+      - in: query
+        name: offset
+        description: Start position of result set. Must be an integer
+        type: string
+      responses:
+        "200":
+          description: ""
+          schema:
+            $ref: '#/definitions/models.ConsultaCalendarioAcademico'
+        "404":
+          description: ""
+  /calendario-academico/{id}:
+    get:
+      tags:
+      - calendario-academico
+      description: get obtener calendario académico por id
+      operationId: ConsultaCalendarioAcademicoController.GetOnePorId
+      parameters:
+      - in: path
+        name: id
+        description: The key for staticblock
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{}'
+        "403":
+          description: :id is empty
+  /calendario-academico/inhabilitar_calendario/{id}:
+    put:
+      tags:
+      - calendario-academico
+      description: Inhabilitar Calendario
+      operationId: ConsultaCalendarioAcademicoController.PutInhabilitarCalendario
+      parameters:
+      - in: path
+        name: id
+        description: el id del calendario a inhabilitar
+        required: true
+        type: string
+      - in: body
+        name: body
+        description: body Inhabilitar calendario content
+        required: true
+        schema:
+          $ref: '#/definitions/{}'
+      responses:
+        "200":
+          description: '{}'
+        "403":
+          description: :id is empty
+  /calendario-academico/padre:
+    post:
+      tags:
+      - calendario-academico
+      description: Proyecto obtener el Id de calendario padre, crear el nuevo calendario (hijo) e inactivar el calendario padre
+      operationId: ConsultaCalendarioAcademicoController.PostCalendarioHijo
+      parameters:
+      - in: body
+        name: body
+        description: body crear calendario hijo content
+        required: true
+        schema:
+          $ref: '#/definitions/{}'
+      responses:
+        "200":
+          description: '{}'
+        "403":
+          description: :body is empty
+  /calendario-academico/v2/{id}:
+    get:
+      tags:
+      - calendario-academico
+      description: get obtener información calendario académico por id
+      operationId: ConsultaCalendarioAcademicoController.GetCalendarInfo
+      parameters:
+      - in: path
+        name: id
+        description: Id de calendario
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{}'
+        "404":
+          description: not found resource
+  /calendario-proyecto/{id}:
+    get:
+      tags:
+      - calendario-proyecto
+      description: get ConsultaCalendarioAcademico by id
+      operationId: ConsultaCalendarioProyectoController.GetCalendarByProjectId
+      parameters:
+      - in: path
+        name: id
+        description: The key for staticblock
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ""
+        "403":
+          description: :id is empty
+  /calendario-proyecto/nivel/{idNiv}/periodo/{idPer}:
+    get:
+      tags:
+      - calendario-proyecto
+      description: get ConsultaCalendarioAcademico & id y Project By Id
+      operationId: ConsultaCalendarioProyectoController.GetCalendarProject
+      parameters:
+      - in: path
+        name: idNiv
+        description: Id nivel
+        required: true
+        type: integer
+        format: int64
+      - in: path
+        name: :idNiv
+        description: Id periodo
+        required: true
+        type: integer
+        format: int64
+      responses:
+        "200":
+          description: ""
+        "403":
+          description: :id is empty
+  /clonar-calendario/:
+    post:
+      tags:
+      - clonar-calendario
+      description: Clona calendario, crea tipo_evento si lo tiene, crea calendario_evento si tiene, crea calendario_evento_tipo_publico si tiene, crea tipo_publico si lo tiene
+      operationId: ClonarCalendarioController.PostCalendario
+      parameters:
+      - in: body
+        name: body
+        description: body id calendario content
+        required: true
+        schema:
+          $ref: '#/definitions/{}'
+      responses:
+        "201":
+          description: '{int}'
+        "400":
+          description: the request contains incorrect syntax
+  /clonar-calendario/extension:
+    post:
+      tags:
+      - clonar-calendario
+      description: Clona calendario para extension, crea tipo_evento si lo tiene, crea calendario_evento si tiene, crea calendario_evento_tipo_publico si tiene, crea tipo_publico si lo tiene
+      operationId: ClonarCalendarioController.PostCalendarioExtension
+      parameters:
+      - in: body
+        name: body
+        description: body id calendario content
+        required: true
+        schema:
+          $ref: '#/definitions/{}'
+      responses:
+        "200":
+          description: '{}'
+        "400":
+          description: the request contains incorrect syntax
+  /clonar-calendario/padre:
+    post:
+      tags:
+      - clonar-calendario
+      description: Clona calendario padre, crea tipo_evento si lo tiene, crea calendario_evento si tiene, crea calendario_evento_tipo_publico si tiene, crea tipo_publico si lo tiene
+      operationId: ClonarCalendarioController.PostCalendarioPadre
+      parameters:
+      - in: body
+        name: body
+        description: body id calendario content
+        required: true
+        schema:
+          $ref: '#/definitions/{}'
+      responses:
+        "200":
+          description: '{}'
+        "400":
+          description: the request contains incorrect syntax
+  /evento/:
+    post:
+      tags:
+      - evento
+      description: Agregar Evento
+      operationId: EventoController.PostEvento
+      parameters:
+      - in: body
+        name: body
+        description: body Agregar Evento content
+        required: true
+        schema:
+          $ref: '#/definitions/{}'
+      responses:
+        "200":
+          description: '{}'
+        "403":
+          description: body is empty
+  /evento/{id}:
+    put:
+      tags:
+      - evento
+      description: Modificar Evento
+      operationId: EventoController.PutEvento
+      parameters:
+      - in: path
+        name: id
+        description: el id del evento a modificar
+        required: true
+        type: string
+      - in: body
+        name: body
+        description: body Modificar Evento content
+        required: true
+        schema:
+          $ref: '#/definitions/{}'
+      responses:
+        "200":
+          description: '{}'
+        "403":
+          description: :id is empty
+    delete:
+      tags:
+      - evento
+      description: eliminar Evento por id
+      operationId: EventoController.DeleteEvento
+      parameters:
+      - in: path
+        name: id
+        description: Id del Evento
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{}'
+        "403":
+          description: :id is empty
+  /evento/{persona}:
+    get:
+      tags:
+      - evento
+      description: consultar Evento por persona
+      operationId: EventoController.GetEvento
+      parameters:
+      - in: path
+        name: persona
+        description: Persona
+        required: true
+        type: string
+      responses:
+        "200":
+          description: '{}'
+        "403":
+          description: :persona is empty
+definitions:
+  '{}':
+    title: '{}'
+    type: object
+  models.ConsultaCalendarioAcademico:
+    title: ConsultaCalendarioAcademico
+    type: object
+tags:
+- name: calendario-academico
+  description: |
+    ConsultaCalendarioAcademicoController operations for Consulta_calendario_academico

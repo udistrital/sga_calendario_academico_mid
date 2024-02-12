@@ -15,10 +15,66 @@
     },
     "basePath": "/v1",
     "paths": {
-        "/calendario_academico/": {
+        "/actividad-calendario/": {
+            "post": {
+                "tags": [
+                    "actividad-calendario"
+                ],
+                "description": "Agregar actividad calendario, tipo_publico y tabla de rompimiento calendario_evento_tipo_publico",
+                "operationId": "ActividadCalendarioController.PostActividadCalendario",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "body Agregar Actividad calendario content",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/{}"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{}"
+                    },
+                    "403": {
+                        "description": "body is empty"
+                    }
+                }
+            }
+        },
+        "/actividad-calendario/update/{id}": {
+            "put": {
+                "tags": [
+                    "actividad-calendario"
+                ],
+                "description": "Actualiza tabla de rompimiento calendario_evento_tipo_publico segun los responsables de una Actividad",
+                "operationId": "ActividadCalendarioController.UpdateActividadResponsables",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "body Actualizar responsables de una Actividad content",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/{}"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{}"
+                    },
+                    "403": {
+                        "description": "body is empty"
+                    }
+                }
+            }
+        },
+        "/calendario-academico/": {
             "get": {
                 "tags": [
-                    "calendario_academico"
+                    "calendario-academico"
                 ],
                 "description": "get todos los calendarios académicos junto a sus periodos correspondientes",
                 "operationId": "ConsultaCalendarioAcademicoController.GetAll",
@@ -73,38 +129,10 @@
                 }
             }
         },
-        "/calendario_academico/calendario_padre": {
-            "post": {
-                "tags": [
-                    "calendario_academico"
-                ],
-                "description": "Proyecto obtener el Id de calendario padre, crear el nuevo calendario (hijo) e inactivar el calendario padre",
-                "operationId": "ConsultaCalendarioAcademicoController.PostCalendarioHijo",
-                "parameters": [
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "description": "body crear calendario hijo content",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/{}"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{}"
-                    },
-                    "403": {
-                        "description": ":body is empty"
-                    }
-                }
-            }
-        },
-        "/calendario_academico/inhabilitar_calendario/{id}": {
+        "/calendario-academico/inhabilitar_calendario/{id}": {
             "put": {
                 "tags": [
-                    "calendario_academico"
+                    "calendario-academico"
                 ],
                 "description": "Inhabilitar Calendario",
                 "operationId": "ConsultaCalendarioAcademicoController.PutInhabilitarCalendario",
@@ -136,10 +164,38 @@
                 }
             }
         },
-        "/calendario_academico/v2/{id}": {
+        "/calendario-academico/padre": {
+            "post": {
+                "tags": [
+                    "calendario-academico"
+                ],
+                "description": "Proyecto obtener el Id de calendario padre, crear el nuevo calendario (hijo) e inactivar el calendario padre",
+                "operationId": "ConsultaCalendarioAcademicoController.PostCalendarioHijo",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "body crear calendario hijo content",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/{}"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{}"
+                    },
+                    "403": {
+                        "description": ":body is empty"
+                    }
+                }
+            }
+        },
+        "/calendario-academico/v2/{id}": {
             "get": {
                 "tags": [
-                    "calendario_academico"
+                    "calendario-academico"
                 ],
                 "description": "get obtener información calendario académico por id",
                 "operationId": "ConsultaCalendarioAcademicoController.GetCalendarInfo",
@@ -162,10 +218,10 @@
                 }
             }
         },
-        "/calendario_academico/{id}": {
+        "/calendario-academico/{id}": {
             "get": {
                 "tags": [
-                    "calendario_academico"
+                    "calendario-academico"
                 ],
                 "description": "get obtener calendario académico por id",
                 "operationId": "ConsultaCalendarioAcademicoController.GetOnePorId",
@@ -188,94 +244,10 @@
                 }
             }
         },
-        "/clonar_calendario/": {
-            "post": {
-                "tags": [
-                    "clonar_calendario"
-                ],
-                "description": "Clona calendario, crea tipo_evento si lo tiene, crea calendario_evento si tiene, crea calendario_evento_tipo_publico si tiene, crea tipo_publico si lo tiene",
-                "operationId": "ClonarCalendarioController.PostCalendario",
-                "parameters": [
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "description": "body id calendario content",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/{}"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "{int}"
-                    },
-                    "400": {
-                        "description": "the request contains incorrect syntax"
-                    }
-                }
-            }
-        },
-        "/clonar_calendario/calendario_extension": {
-            "post": {
-                "tags": [
-                    "clonar_calendario"
-                ],
-                "description": "Clona calendario para extension, crea tipo_evento si lo tiene, crea calendario_evento si tiene, crea calendario_evento_tipo_publico si tiene, crea tipo_publico si lo tiene",
-                "operationId": "ClonarCalendarioController.PostCalendarioExtension",
-                "parameters": [
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "description": "body id calendario content",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/{}"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{}"
-                    },
-                    "400": {
-                        "description": "the request contains incorrect syntax"
-                    }
-                }
-            }
-        },
-        "/clonar_calendario/calendario_padre": {
-            "post": {
-                "tags": [
-                    "clonar_calendario"
-                ],
-                "description": "Clona calendario padre, crea tipo_evento si lo tiene, crea calendario_evento si tiene, crea calendario_evento_tipo_publico si tiene, crea tipo_publico si lo tiene",
-                "operationId": "ClonarCalendarioController.PostCalendarioPadre",
-                "parameters": [
-                    {
-                        "in": "body",
-                        "name": "body",
-                        "description": "body id calendario content",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/{}"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{}"
-                    },
-                    "400": {
-                        "description": "the request contains incorrect syntax"
-                    }
-                }
-            }
-        },
-        "/consulta_calendario_proyecto/nivel/{idNiv}/periodo/{idPer}": {
+        "/calendario-proyecto/nivel/{idNiv}/periodo/{idPer}": {
             "get": {
                 "tags": [
-                    "consulta_calendario_proyecto"
+                    "calendario-proyecto"
                 ],
                 "description": "get ConsultaCalendarioAcademico \u0026 id y Project By Id",
                 "operationId": "ConsultaCalendarioProyectoController.GetCalendarProject",
@@ -307,10 +279,10 @@
                 }
             }
         },
-        "/consulta_calendario_proyecto/{id}": {
+        "/calendario-proyecto/{id}": {
             "get": {
                 "tags": [
-                    "consulta_calendario_proyecto"
+                    "calendario-proyecto"
                 ],
                 "description": "get ConsultaCalendarioAcademico by id",
                 "operationId": "ConsultaCalendarioProyectoController.GetCalendarByProjectId",
@@ -333,18 +305,18 @@
                 }
             }
         },
-        "/crear_actividad_calendario/": {
+        "/clonar-calendario/": {
             "post": {
                 "tags": [
-                    "crear_actividad_calendario"
+                    "clonar-calendario"
                 ],
-                "description": "Agregar actividad calendario, tipo_publico y tabla de rompimiento calendario_evento_tipo_publico",
-                "operationId": "ActividadCalendarioController.PostActividadCalendario",
+                "description": "Clona calendario, crea tipo_evento si lo tiene, crea calendario_evento si tiene, crea calendario_evento_tipo_publico si tiene, crea tipo_publico si lo tiene",
+                "operationId": "ClonarCalendarioController.PostCalendario",
                 "parameters": [
                     {
                         "in": "body",
                         "name": "body",
-                        "description": "body Agregar Actividad calendario content",
+                        "description": "body id calendario content",
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/{}"
@@ -352,27 +324,27 @@
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "{}"
+                    "201": {
+                        "description": "{int}"
                     },
-                    "403": {
-                        "description": "body is empty"
+                    "400": {
+                        "description": "the request contains incorrect syntax"
                     }
                 }
             }
         },
-        "/crear_actividad_calendario/update/{id}": {
-            "put": {
+        "/clonar-calendario/extension": {
+            "post": {
                 "tags": [
-                    "crear_actividad_calendario"
+                    "clonar-calendario"
                 ],
-                "description": "Actualiza tabla de rompimiento calendario_evento_tipo_publico segun los responsables de una Actividad",
-                "operationId": "ActividadCalendarioController.UpdateActividadResponsables",
+                "description": "Clona calendario para extension, crea tipo_evento si lo tiene, crea calendario_evento si tiene, crea calendario_evento_tipo_publico si tiene, crea tipo_publico si lo tiene",
+                "operationId": "ClonarCalendarioController.PostCalendarioExtension",
                 "parameters": [
                     {
                         "in": "body",
                         "name": "body",
-                        "description": "body Actualizar responsables de una Actividad content",
+                        "description": "body id calendario content",
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/{}"
@@ -383,8 +355,36 @@
                     "200": {
                         "description": "{}"
                     },
-                    "403": {
-                        "description": "body is empty"
+                    "400": {
+                        "description": "the request contains incorrect syntax"
+                    }
+                }
+            }
+        },
+        "/clonar-calendario/padre": {
+            "post": {
+                "tags": [
+                    "clonar-calendario"
+                ],
+                "description": "Clona calendario padre, crea tipo_evento si lo tiene, crea calendario_evento si tiene, crea calendario_evento_tipo_publico si tiene, crea tipo_publico si lo tiene",
+                "operationId": "ClonarCalendarioController.PostCalendarioPadre",
+                "parameters": [
+                    {
+                        "in": "body",
+                        "name": "body",
+                        "description": "body id calendario content",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/{}"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{}"
+                    },
+                    "400": {
+                        "description": "the request contains incorrect syntax"
                     }
                 }
             }
@@ -515,7 +515,7 @@
     },
     "tags": [
         {
-            "name": "calendario_academico",
+            "name": "calendario-academico",
             "description": "ConsultaCalendarioAcademicoController operations for Consulta_calendario_academico\n"
         }
     ]

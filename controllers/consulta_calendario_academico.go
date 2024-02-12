@@ -7,7 +7,9 @@ import (
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
 	"github.com/udistrital/sga_mid_calendario_academico/models"
+	"github.com/udistrital/utils_oas/errorhandler"
 	"github.com/udistrital/utils_oas/request"
+	"github.com/udistrital/utils_oas/requestresponse"
 	"github.com/udistrital/utils_oas/time_bogota"
 )
 
@@ -38,12 +40,14 @@ func (c *ConsultaCalendarioAcademicoController) URLMapping() {
 // @Failure 404
 // @router / [get]
 func (c *ConsultaCalendarioAcademicoController) GetAll() {
+	defer errorhandler.HandlePanic(&c.Controller)
+
 	var resultados []map[string]interface{}
 	var calendarios []map[string]interface{}
 	var periodo map[string]interface{}
-	var alerta models.Alert
 	var errorGetAll bool
-	alertas := []interface{}{"Response:"}
+	var message string
+	var statusCode int = 200
 
 	errCalendario := request.GetJson("http://"+beego.AppConfig.String("EventoService")+"calendario?limit=0&sortby=Id&order=desc", &calendarios)
 	if errCalendario == nil {
@@ -78,11 +82,8 @@ func (c *ConsultaCalendarioAcademicoController) GetAll() {
 							resultados = append(resultados, resultado)
 						} else {
 							errorGetAll = true
-							alertas = append(alertas, errPeriodo.Error())
-							alerta.Code = "400"
-							alerta.Type = "error"
-							alerta.Body = alertas
-							c.Data["json"] = map[string]interface{}{"Response": alerta}
+							message += errPeriodo.Error()
+							statusCode = 400
 						}
 					}
 
@@ -90,27 +91,21 @@ func (c *ConsultaCalendarioAcademicoController) GetAll() {
 			}
 		} else {
 			errorGetAll = true
-			alertas = append(alertas, "No data found")
-			alerta.Code = "404"
-			alerta.Type = "error"
-			alerta.Body = alertas
-			c.Data["json"] = map[string]interface{}{"Response": alerta}
+			message += "No data found"
+			statusCode = 404
 		}
 	} else {
 		errorGetAll = true
-		alertas = append(alertas, errCalendario.Error())
-		alerta.Code = "400"
-		alerta.Type = "error"
-		alerta.Body = alertas
-		c.Data["json"] = map[string]interface{}{"Response": alerta}
+		message += errCalendario.Error()
+		statusCode = 400
 	}
 
 	if !errorGetAll {
-		alertas = append(alertas, resultados)
-		alerta.Code = "200"
-		alerta.Type = "OK"
-		alerta.Body = alertas
-		c.Data["json"] = map[string]interface{}{"Response": alerta}
+		c.Ctx.Output.SetStatus(200)
+		c.Data["json"] = requestresponse.APIResponseDTO(true, 200, resultados)
+	} else {
+		c.Ctx.Output.SetStatus(statusCode)
+		c.Data["json"] = requestresponse.APIResponseDTO(false, statusCode, nil, message)
 	}
 
 	c.ServeJSON()
@@ -124,6 +119,7 @@ func (c *ConsultaCalendarioAcademicoController) GetAll() {
 // @Failure 403 :id is empty
 // @router /:id [get]
 func (c *ConsultaCalendarioAcademicoController) GetOnePorId() {
+	defer errorhandler.HandlePanic(&c.Controller)
 
 	var resultado map[string]interface{}
 	var resultados []map[string]interface{}
@@ -146,6 +142,7 @@ func (c *ConsultaCalendarioAcademicoController) GetOnePorId() {
 		// consultar calendario evento por tipo evento
 		var calendarios []map[string]interface{}
 		errcalendario := request.GetJson("http://"+beego.AppConfig.String("EventoService")+"calendario_evento?query=TipoEventoId__Id.CalendarioID__Id:"+idStr, &calendarios)
+
 		if errcalendario == nil {
 			if calendarios[0]["Id"] != nil {
 
@@ -174,7 +171,8 @@ func (c *ConsultaCalendarioAcademicoController) GetOnePorId() {
 								}
 								versionCalendarioResultado = append(versionCalendarioResultado, versionCalendario)
 							} else {
-								c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": errcalendarioPadre.Error(), "Data": nil}
+								c.Ctx.Output.SetStatus(400)
+								c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errcalendarioPadre.Error())
 							}
 						}
 					} else {
@@ -205,11 +203,13 @@ func (c *ConsultaCalendarioAcademicoController) GetOnePorId() {
 							"Nombre":     documentos["Nombre"],
 						}
 					} else {
-						c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Request successful", "Data": documentos}
+						c.Ctx.Output.SetStatus(200)
+						c.Data["json"] = requestresponse.APIResponseDTO(true, 200, documentos)
 					}
 
 				} else {
-					c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": errdocumento.Error(), "Data": nil}
+					c.Ctx.Output.SetStatus(400)
+					c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errdocumento.Error())
 				}
 
 				// recorrer el calendario para agrupar las actividades por proceso
@@ -277,7 +277,8 @@ func (c *ConsultaCalendarioAcademicoController) GetOnePorId() {
 											}
 										}
 									} else {
-										c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": errresponsable.Error(), "Data": nil}
+										c.Ctx.Output.SetStatus(400)
+										c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errresponsable.Error())
 									}
 								}
 
@@ -308,11 +309,13 @@ func (c *ConsultaCalendarioAcademicoController) GetOnePorId() {
 							actividadResultado = nil
 
 						} else {
-							c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Request successful", "Data": procesos}
+							c.Ctx.Output.SetStatus(200)
+							c.Data["json"] = requestresponse.APIResponseDTO(true, 200, procesos)
 						}
 
 					} else {
-						c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": errproceso.Error(), "Data": nil}
+						c.Ctx.Output.SetStatus(400)
+						c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errproceso.Error())
 					}
 				}
 				calendarioAux := calendarios[0]["TipoEventoId"].(map[string]interface{})["CalendarioID"].(map[string]interface{})
@@ -328,7 +331,8 @@ func (c *ConsultaCalendarioAcademicoController) GetOnePorId() {
 				}
 				resultados = append(resultados, resultado)
 
-				c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Request successful", "Data": resultados}
+				c.Ctx.Output.SetStatus(200)
+				c.Data["json"] = requestresponse.APIResponseDTO(true, 200, resultados)
 
 			} else {
 				var calendario map[string]interface{}
@@ -347,6 +351,7 @@ func (c *ConsultaCalendarioAcademicoController) GetOnePorId() {
 
 						documentoID := fmt.Sprintf("%.f", calendario["DocumentoId"].(float64))
 						var documentos map[string]interface{}
+
 						errdocumento := request.GetJson("http://"+beego.AppConfig.String("DocumentosService")+"documento/"+documentoID, &documentos)
 
 						if errdocumento == nil {
@@ -365,11 +370,13 @@ func (c *ConsultaCalendarioAcademicoController) GetOnePorId() {
 									"Nombre":     documentos["Nombre"],
 								}
 							} else {
-								c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Request successful", "Data": documentos}
+								c.Ctx.Output.SetStatus(200)
+								c.Data["json"] = requestresponse.APIResponseDTO(true, 200, documentos)
 							}
 
 						} else {
-							c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": errdocumento.Error(), "Data": nil}
+							c.Ctx.Output.SetStatus(400)
+							c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errdocumento.Error())
 						}
 
 						resultado = map[string]interface{}{
@@ -384,26 +391,32 @@ func (c *ConsultaCalendarioAcademicoController) GetOnePorId() {
 						}
 						resultados = append(resultados, resultado)
 
-						c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Request successful", "Data": resultados}
+						c.Ctx.Output.SetStatus(200)
+						c.Data["json"] = requestresponse.APIResponseDTO(true, 200, resultados)
 					} else {
-						c.Data["json"] = map[string]interface{}{"Success": false, "Status": "404", "Message": "No data found", "Data": nil}
+						c.Ctx.Output.SetStatus(404)
+						c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil)
 					}
 
 				} else {
-					c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Request successful", "Data": calendarios}
+					c.Ctx.Output.SetStatus(200)
+					c.Data["json"] = requestresponse.APIResponseDTO(true, 200, calendarios)
 				}
 
 			}
 
 		} else {
-			c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": errcalendario.Error(), "Data": nil}
+			c.Ctx.Output.SetStatus(400)
+			c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errcalendario.Error())
 		}
 
 	} else {
 		if resultado["Body"] == "<QuerySeter> no row found" {
-			c.Data["json"] = map[string]interface{}{"Success": false, "Status": "404", "Message": "No row found", "Data": nil}
+			c.Ctx.Output.SetStatus(404)
+			c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, "No row found")
 		} else {
-			c.Data["json"] = map[string]interface{}{"Success": false, "Status": "404", "Message": "No data found", "Data": nil}
+			c.Ctx.Output.SetStatus(404)
+			c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil)
 		}
 	}
 
@@ -419,6 +432,7 @@ func (c *ConsultaCalendarioAcademicoController) GetOnePorId() {
 // @Failure 403 :id is empty
 // @router /inhabilitar_calendario/:id [put]
 func (c *ConsultaCalendarioAcademicoController) PutInhabilitarCalendario() {
+	defer errorhandler.HandlePanic(&c.Controller)
 
 	idCalendario := c.Ctx.Input.Param(":id")
 	var calendario map[string]interface{}
@@ -428,7 +442,9 @@ func (c *ConsultaCalendarioAcademicoController) PutInhabilitarCalendario() {
 	var tipoPublico map[string]interface{}
 	var resultado map[string]interface{}
 	var dataPut map[string]interface{}
-	var alerta models.Alert
+	var message string
+	var statusCode int = 200
+	var success bool = true
 	alertas := []interface{}{"Response:"}
 	if err := json.Unmarshal(c.Ctx.Input.RequestBody, &dataPut); err == nil {
 
@@ -443,9 +459,8 @@ func (c *ConsultaCalendarioAcademicoController) PutInhabilitarCalendario() {
 
 				errCalendario := request.SendJson("http://"+beego.AppConfig.String("EventoService")+"calendario/"+idCalendario, "PUT", &resultado, calendario)
 				if resultado["Type"] == "error" || errCalendario != nil || resultado["Status"] == "404" || resultado["Message"] != nil {
-					alertas = append(alertas, resultado)
-					alerta.Type = "error"
-					alerta.Code = "400"
+					success = false
+					statusCode = 400
 				} else {
 
 					errCalendario := request.GetJson("http://"+beego.AppConfig.String("EventoService")+"tipo_evento?query=CalendarioID__Id:"+idCalendario, &tipoEvento)
@@ -459,9 +474,8 @@ func (c *ConsultaCalendarioAcademicoController) PutInhabilitarCalendario() {
 
 								errCalendario := request.SendJson("http://"+beego.AppConfig.String("EventoService")+"tipo_evento/"+idEvento, "PUT", &resultado, tEvento)
 								if resultado["Type"] == "error" || errCalendario != nil || resultado["Status"] == "404" || resultado["Message"] != nil {
-									alertas = append(alertas, resultado)
-									alerta.Type = "error"
-									alerta.Code = "400"
+									success = false
+									statusCode = 400
 								} else {
 
 									errCalendario := request.GetJson("http://"+beego.AppConfig.String("EventoService")+"calendario_evento?query=TipoEventoId__Id:"+idEvento, &calendarioEvento)
@@ -475,9 +489,8 @@ func (c *ConsultaCalendarioAcademicoController) PutInhabilitarCalendario() {
 
 												errCalendario := request.SendJson("http://"+beego.AppConfig.String("EventoService")+"calendario_evento/"+idCalendarioEvento, "PUT", &resultado, cEvento)
 												if resultado["Type"] == "error" || errCalendario != nil || resultado["Status"] == "404" || resultado["Message"] != nil {
-													alertas = append(alertas, resultado)
-													alerta.Type = "error"
-													alerta.Code = "400"
+													success = false
+													statusCode = 400
 												} else {
 
 													errCalendario := request.GetJson("http://"+beego.AppConfig.String("EventoService")+"calendario_evento_tipo_publico?query=CalendarioEventoId__Id:"+idCalendarioEvento, &calendarioEventoTipoPublico)
@@ -491,9 +504,8 @@ func (c *ConsultaCalendarioAcademicoController) PutInhabilitarCalendario() {
 
 																request.SendJson("http://"+beego.AppConfig.String("EventoService")+"calendario_evento_tipo_publico/"+idCalendarioEventoTipoPublico, "PUT", &resultado, cEventoTipoPublico)
 																if resultado["Type"] == "error" || resultado["Status"] == "404" || resultado["Message"] != nil {
-																	alertas = append(alertas, resultado)
-																	alerta.Type = "error"
-																	alerta.Code = "400"
+																	success = false
+																	statusCode = 400
 																} else {
 
 																	idTipoPublico := fmt.Sprintf("%.f", cEventoTipoPublico["TipoPublicoId"].(map[string]interface{})["Id"].(float64))
@@ -506,9 +518,8 @@ func (c *ConsultaCalendarioAcademicoController) PutInhabilitarCalendario() {
 
 																			errCalendario := request.SendJson("http://"+beego.AppConfig.String("EventoService")+"tipo_publico/"+idTipoPublico, "PUT", &resultado, tipoPublico)
 																			if resultado["Type"] == "error" || errCalendario != nil || resultado["Status"] == "404" || resultado["Message"] != nil {
-																				alertas = append(alertas, resultado)
-																				alerta.Type = "error"
-																				alerta.Code = "400"
+																				success = false
+																				statusCode = 400
 																			}
 
 																		}
@@ -536,24 +547,33 @@ func (c *ConsultaCalendarioAcademicoController) PutInhabilitarCalendario() {
 					}
 				}
 			} else {
-				c.Data["json"] = calendario
+				c.Ctx.Output.SetStatus(200)
+				c.Data["json"] = requestresponse.APIResponseDTO(true, 200, calendario)
 			}
 			logs.Error(calendario)
-			c.Data["system"] = calendario
+			c.Data["json"] = requestresponse.APIResponseDTO(true, 200, calendario)
 			c.Abort("200")
 		} else {
 			logs.Error(errCalendario)
-			c.Data["system"] = errCalendario
+			c.Data["json"] = requestresponse.APIResponseDTO(true, 400, nil, errCalendario.Error())
 			c.Abort("400")
 		}
 
 	} else {
-		alerta.Type = "error"
-		alerta.Code = "400"
-		alertas = append(alertas, err.Error())
+		success = false
+		message += err.Error()
 	}
-	alerta.Body = alertas
-	c.Data["json"] = alerta
+	if success {
+		c.Ctx.Output.SetStatus(200)
+		c.Data["json"] = requestresponse.APIResponseDTO(success, 200, alertas)
+	} else {
+		c.Ctx.Output.SetStatus(statusCode)
+		if message != "" {
+			c.Data["json"] = requestresponse.APIResponseDTO(success, statusCode, nil, message)
+		} else {
+			c.Data["json"] = requestresponse.APIResponseDTO(success, statusCode, nil)
+		}
+	}
 	c.ServeJSON()
 }
 
@@ -563,8 +583,9 @@ func (c *ConsultaCalendarioAcademicoController) PutInhabilitarCalendario() {
 // @Param   body        body    {}  true        "body crear calendario hijo content"
 // @Success 200 {}
 // @Failure 403 :body is empty
-// @router /calendario_padre [post]
+// @router /padre [post]
 func (c *ConsultaCalendarioAcademicoController) PostCalendarioHijo() {
+	defer errorhandler.HandlePanic(&c.Controller)
 
 	var AuxCalendarioHijo map[string]interface{}
 	var calendarioHijoPost map[string]interface{}
@@ -609,30 +630,34 @@ func (c *ConsultaCalendarioAcademicoController) PostCalendarioHijo() {
 						errCalendarioPadre := request.SendJson("http://"+beego.AppConfig.String("EventoService")+"calendario/"+IdPadre, "PUT", &CalendarioPadrePut, CalendarioPadreAux)
 						if errCalendarioPadre == nil && fmt.Sprintf("%v", CalendarioPadrePut["System"]) != "map[]" && CalendarioPadrePut["Id"] != nil {
 							if CalendarioPadrePut["Status"] != 400 {
-								//c.Data["json"] = CalendarioPadrePut
-								c.Data["json"] = calendarioHijoPost
+								c.Ctx.Output.SetStatus(200)
+								c.Data["json"] = requestresponse.APIResponseDTO(false, 200, calendarioHijoPost)
 							} else {
 								logs.Error(err)
-								c.Data["system"] = err
-								c.Data["json"] = map[string]interface{}{"Code": "400", "Body": err.Error(), "Type": "error"}
+								c.Ctx.Output.SetStatus(400)
+								c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, err.Error())
 							}
 						} else {
 							logs.Error(err)
-							c.Data["system"] = err
+							c.Ctx.Output.SetStatus(400)
+							c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, err.Error())
 						}
 					}
 				}
 			} else {
 				logs.Error(err)
-				c.Data["system"] = err
-				c.Data["json"] = map[string]interface{}{"Code": "400", "Body": err.Error(), "Type": "error"}
+				c.Ctx.Output.SetStatus(400)
+				c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, err.Error())
 			}
 
 		} else {
 			logs.Error(err)
-			c.Data["system"] = err
-			c.Data["json"] = map[string]interface{}{"Code": "400", "Body": err.Error(), "Type": "error"}
+			c.Ctx.Output.SetStatus(400)
+			c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, err.Error())
 		}
+	} else {
+		c.Ctx.Output.SetStatus(404)
+		c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, err.Error())
 	}
 	c.ServeJSON()
 }
@@ -645,6 +670,7 @@ func (c *ConsultaCalendarioAcademicoController) PostCalendarioHijo() {
 // @Failure 404 not found resource
 // @router /v2/:id [get]
 func (c *ConsultaCalendarioAcademicoController) GetCalendarInfo() {
+	defer errorhandler.HandlePanic(&c.Controller)
 
 	var resultado map[string]interface{}
 	var resultados []map[string]interface{}
@@ -693,7 +719,8 @@ func (c *ConsultaCalendarioAcademicoController) GetCalendarInfo() {
 								}
 								versionCalendarioResultado = append(versionCalendarioResultado, versionCalendario)
 							} else {
-								c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": errcalendarioPadre.Error(), "Data": nil}
+								c.Ctx.Output.SetStatus(400)
+								c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, errcalendarioPadre.Error())
 							}
 						}
 
@@ -726,11 +753,13 @@ func (c *ConsultaCalendarioAcademicoController) GetCalendarInfo() {
 							"Nombre":     documentos["Nombre"],
 						}
 					} else {
-						c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Request successful", "Data": documentos}
+						c.Ctx.Output.SetStatus(200)
+						c.Data["json"] = requestresponse.APIResponseDTO(true, 200, documentos)
 					}
 
 				} else {
-					c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": errdocumento.Error(), "Data": nil}
+					c.Ctx.Output.SetStatus(400)
+					c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errdocumento.Error())
 				}
 
 				documentoExtID, ok := documento["DocumentoExtensionId"].(float64)
@@ -753,11 +782,13 @@ func (c *ConsultaCalendarioAcademicoController) GetCalendarInfo() {
 								"Nombre":     documentosExt["Nombre"],
 							}
 						} else {
-							c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Request successful", "Data": documentosExt}
+							c.Ctx.Output.SetStatus(200)
+							c.Data["json"] = requestresponse.APIResponseDTO(true, 200, documentosExt)
 						}
 
 					} else {
-						c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": errdocumentoExt.Error(), "Data": nil}
+						c.Ctx.Output.SetStatus(400)
+						c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errdocumentoExt.Error())
 					}
 				}
 
@@ -826,7 +857,8 @@ func (c *ConsultaCalendarioAcademicoController) GetCalendarInfo() {
 											}
 										}
 									} else {
-										c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": errresponsable.Error(), "Data": nil}
+										c.Ctx.Output.SetStatus(400)
+										c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errresponsable.Error())
 									}
 								}
 
@@ -857,11 +889,13 @@ func (c *ConsultaCalendarioAcademicoController) GetCalendarInfo() {
 							actividadResultado = nil
 
 						} else {
-							c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Request successful", "Data": procesos}
+							c.Ctx.Output.SetStatus(200)
+							c.Data["json"] = requestresponse.APIResponseDTO(true, 200, procesos)
 						}
 
 					} else {
-						c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": errproceso.Error(), "Data": nil}
+						c.Ctx.Output.SetStatus(400)
+						c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errproceso.Error())
 					}
 				}
 				calendarioAux := calendarios[0]["TipoEventoId"].(map[string]interface{})["CalendarioID"].(map[string]interface{})
@@ -908,7 +942,8 @@ func (c *ConsultaCalendarioAcademicoController) GetCalendarInfo() {
 				}
 				resultados = append(resultados, resultado)
 
-				c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Request successful", "Data": resultados}
+				c.Ctx.Output.SetStatus(200)
+				c.Data["json"] = requestresponse.APIResponseDTO(true, 200, resultados)
 
 			} else {
 				///////////////////////// sin eventos //////////////////////
@@ -946,11 +981,13 @@ func (c *ConsultaCalendarioAcademicoController) GetCalendarInfo() {
 									"Nombre":     documentos["Nombre"],
 								}
 							} else {
-								c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Request successful", "Data": documentos}
+								c.Ctx.Output.SetStatus(200)
+								c.Data["json"] = requestresponse.APIResponseDTO(true, 200, documentos)
 							}
 
 						} else {
-							c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": errdocumento.Error(), "Data": nil}
+							c.Ctx.Output.SetStatus(400)
+							c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errdocumento.Error())
 						}
 
 						documentoExtID, ok := calendario["DocumentoExtensionId"].(float64)
@@ -973,11 +1010,13 @@ func (c *ConsultaCalendarioAcademicoController) GetCalendarInfo() {
 										"Nombre":     documentosExt["Nombre"],
 									}
 								} else {
-									c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Request successful", "Data": documentosExt}
+									c.Ctx.Output.SetStatus(200)
+									c.Data["json"] = requestresponse.APIResponseDTO(true, 200, documentosExt)
 								}
 
 							} else {
-								c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": errdocumentoExt.Error(), "Data": nil}
+								c.Ctx.Output.SetStatus(400)
+								c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errdocumentoExt.Error())
 							}
 						}
 
@@ -1023,26 +1062,32 @@ func (c *ConsultaCalendarioAcademicoController) GetCalendarInfo() {
 						}
 						resultados = append(resultados, resultado)
 
-						c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Request successful", "Data": resultados}
+						c.Ctx.Output.SetStatus(200)
+						c.Data["json"] = requestresponse.APIResponseDTO(true, 200, resultados)
 					} else {
-						c.Data["json"] = map[string]interface{}{"Success": false, "Status": "404", "Message": "No data found", "Data": nil}
+						c.Ctx.Output.SetStatus(404)
+						c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil)
 					}
 
 				} else {
-					c.Data["json"] = map[string]interface{}{"Success": true, "Status": "200", "Message": "Request successful", "Data": calendarios}
+					c.Ctx.Output.SetStatus(200)
+					c.Data["json"] = requestresponse.APIResponseDTO(true, 200, calendarios)
 				}
 
 			}
 
 		} else {
-			c.Data["json"] = map[string]interface{}{"Success": false, "Status": "400", "Message": errcalendario.Error(), "Data": nil}
+			c.Ctx.Output.SetStatus(400)
+			c.Data["json"] = requestresponse.APIResponseDTO(false, 400, nil, errcalendario.Error())
 		}
 
 	} else {
 		if resultado["Body"] == "<QuerySeter> no row found" {
-			c.Data["json"] = map[string]interface{}{"Success": false, "Status": "404", "Message": "No row found", "Data": nil}
+			c.Ctx.Output.SetStatus(404)
+			c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil, "No row found")
 		} else {
-			c.Data["json"] = map[string]interface{}{"Success": false, "Status": "404", "Message": "No data found", "Data": nil}
+			c.Ctx.Output.SetStatus(404)
+			c.Data["json"] = requestresponse.APIResponseDTO(false, 404, nil)
 		}
 	}
 
