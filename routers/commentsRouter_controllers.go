@@ -7,7 +7,7 @@ import (
 
 func init() {
 
-    beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_academico_mid/controllers:ActividadCalendarioController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_academico_mid/controllers:ActividadCalendarioController"],
+    beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:ActividadCalendarioController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:ActividadCalendarioController"],
         beego.ControllerComments{
             Method: "PostActividadCalendario",
             Router: "/",
@@ -16,7 +16,7 @@ func init() {
             Filters: nil,
             Params: nil})
 
-    beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_academico_mid/controllers:ActividadCalendarioController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_academico_mid/controllers:ActividadCalendarioController"],
+    beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:ActividadCalendarioController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:ActividadCalendarioController"],
         beego.ControllerComments{
             Method: "UpdateActividadResponsables",
             Router: "/update/:id",
@@ -25,7 +25,7 @@ func init() {
             Filters: nil,
             Params: nil})
 
-    beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_academico_mid/controllers:ClonarCalendarioController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_academico_mid/controllers:ClonarCalendarioController"],
+    beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:ClonarCalendarioController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:ClonarCalendarioController"],
         beego.ControllerComments{
             Method: "PostCalendario",
             Router: "/",
@@ -34,7 +34,7 @@ func init() {
             Filters: nil,
             Params: nil})
 
-    beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_academico_mid/controllers:ClonarCalendarioController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_academico_mid/controllers:ClonarCalendarioController"],
+    beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:ClonarCalendarioController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:ClonarCalendarioController"],
         beego.ControllerComments{
             Method: "PostCalendarioExtension",
             Router: "/extension",
@@ -43,7 +43,7 @@ func init() {
             Filters: nil,
             Params: nil})
 
-    beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_academico_mid/controllers:ClonarCalendarioController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_academico_mid/controllers:ClonarCalendarioController"],
+    beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:ClonarCalendarioController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:ClonarCalendarioController"],
         beego.ControllerComments{
             Method: "PostCalendarioPadre",
             Router: "/padre",
@@ -52,7 +52,7 @@ func init() {
             Filters: nil,
             Params: nil})
 
-    beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_academico_mid/controllers:ConsultaCalendarioAcademicoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_academico_mid/controllers:ConsultaCalendarioAcademicoController"],
+    beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:ConsultaCalendarioAcademicoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:ConsultaCalendarioAcademicoController"],
         beego.ControllerComments{
             Method: "GetAll",
             Router: "/",
@@ -61,7 +61,7 @@ func init() {
             Filters: nil,
             Params: nil})
 
-    beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_academico_mid/controllers:ConsultaCalendarioAcademicoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_academico_mid/controllers:ConsultaCalendarioAcademicoController"],
+    beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:ConsultaCalendarioAcademicoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:ConsultaCalendarioAcademicoController"],
         beego.ControllerComments{
             Method: "GetOnePorId",
             Router: "/:id",
@@ -70,7 +70,7 @@ func init() {
             Filters: nil,
             Params: nil})
 
-    beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_academico_mid/controllers:ConsultaCalendarioAcademicoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_academico_mid/controllers:ConsultaCalendarioAcademicoController"],
+    beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:ConsultaCalendarioAcademicoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:ConsultaCalendarioAcademicoController"],
         beego.ControllerComments{
             Method: "PutInhabilitarCalendario",
             Router: "/inhabilitar_calendario/:id",
@@ -79,7 +79,7 @@ func init() {
             Filters: nil,
             Params: nil})
 
-    beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_academico_mid/controllers:ConsultaCalendarioAcademicoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_academico_mid/controllers:ConsultaCalendarioAcademicoController"],
+    beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:ConsultaCalendarioAcademicoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:ConsultaCalendarioAcademicoController"],
         beego.ControllerComments{
             Method: "PostCalendarioHijo",
             Router: "/padre",
@@ -88,7 +88,7 @@ func init() {
             Filters: nil,
             Params: nil})
 
-    beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_academico_mid/controllers:ConsultaCalendarioAcademicoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_academico_mid/controllers:ConsultaCalendarioAcademicoController"],
+    beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:ConsultaCalendarioAcademicoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:ConsultaCalendarioAcademicoController"],
         beego.ControllerComments{
             Method: "GetCalendarInfo",
             Router: "/v2/:id",
@@ -97,7 +97,7 @@ func init() {
             Filters: nil,
             Params: nil})
 
-    beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_academico_mid/controllers:ConsultaCalendarioProyectoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_academico_mid/controllers:ConsultaCalendarioProyectoController"],
+    beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:ConsultaCalendarioProyectoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:ConsultaCalendarioProyectoController"],
         beego.ControllerComments{
             Method: "GetCalendarByProjectId",
             Router: "/:id",
@@ -106,7 +106,7 @@ func init() {
             Filters: nil,
             Params: nil})
 
-    beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_academico_mid/controllers:ConsultaCalendarioProyectoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_academico_mid/controllers:ConsultaCalendarioProyectoController"],
+    beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:ConsultaCalendarioProyectoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:ConsultaCalendarioProyectoController"],
         beego.ControllerComments{
             Method: "GetCalendarProject",
             Router: "/nivel/:idNiv/periodo/:idPer",
@@ -115,7 +115,7 @@ func init() {
             Filters: nil,
             Params: nil})
 
-    beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_academico_mid/controllers:EventoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_academico_mid/controllers:EventoController"],
+    beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:EventoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:EventoController"],
         beego.ControllerComments{
             Method: "PostEvento",
             Router: "/",
@@ -124,7 +124,7 @@ func init() {
             Filters: nil,
             Params: nil})
 
-    beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_academico_mid/controllers:EventoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_academico_mid/controllers:EventoController"],
+    beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:EventoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:EventoController"],
         beego.ControllerComments{
             Method: "PutEvento",
             Router: "/:id",
@@ -133,7 +133,7 @@ func init() {
             Filters: nil,
             Params: nil})
 
-    beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_academico_mid/controllers:EventoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_academico_mid/controllers:EventoController"],
+    beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:EventoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:EventoController"],
         beego.ControllerComments{
             Method: "DeleteEvento",
             Router: "/:id",
@@ -142,7 +142,7 @@ func init() {
             Filters: nil,
             Params: nil})
 
-    beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_academico_mid/controllers:EventoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_academico_mid/controllers:EventoController"],
+    beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:EventoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:EventoController"],
         beego.ControllerComments{
             Method: "GetEvento",
             Router: "/:persona",
