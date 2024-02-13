@@ -7,7 +7,7 @@ import (
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
-	"github.com/udistrital/sga_calendario_academico_mid/models"
+	"github.com/udistrital/sga_calendario_mid/models"
 	"github.com/udistrital/utils_oas/request"
 	"github.com/udistrital/utils_oas/requestresponse"
 	"github.com/udistrital/utils_oas/time_bogota"
