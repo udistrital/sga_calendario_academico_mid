@@ -102,7 +102,7 @@ paths:
           description: '{}'
         "403":
           description: :id is empty
-  /calendario-academico/inhabilitar_calendario/{id}:
+  /calendario-academico/calendario/academico/{id}/inhabilitar:
     put:
       tags:
       - calendario-academico
@@ -177,25 +177,21 @@ paths:
           description: ""
         "403":
           description: :id is empty
-  /calendario-proyecto/nivel/{idNiv}/periodo/{idPer}:
+  /calendario-proyecto/calendario/proyecto:
     get:
       tags:
       - calendario-proyecto
       description: get ConsultaCalendarioAcademico & id y Project By Id
       operationId: ConsultaCalendarioProyectoController.GetCalendarProject
       parameters:
-      - in: path
-        name: idNiv
-        description: Id nivel
-        required: true
-        type: integer
-        format: int64
-      - in: path
-        name: :idNiv
-        description: Id periodo
-        required: true
-        type: integer
-        format: int64
+      - in: query
+        name: id-nivel
+        description: Id Nivel
+        type: string
+      - in: query
+        name: id-periodo
+        description: Id Periodo
+        type: string
       responses:
         "200":
           description: ""

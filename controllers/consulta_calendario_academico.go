@@ -81,7 +81,7 @@ func (c *ConsultaCalendarioAcademicoController) GetOnePorId() {
 // @Param   body        body    {}  true        "body Inhabilitar calendario content"
 // @Success 200 {}
 // @Failure 403 :id is empty
-// @router /inhabilitar_calendario/:id [put]
+// @router /calendario/academico/:id/inhabilitar [put]
 func (c *ConsultaCalendarioAcademicoController) PutInhabilitarCalendario() {
 	defer errorhandler.HandlePanic(&c.Controller)
 
