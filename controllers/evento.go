@@ -78,7 +78,7 @@ func (c *EventoController) PutEvento() {
 // @Param   persona      path    string  true        "Persona"
 // @Success 200 {}
 // @Failure 403 :persona is empty
-// @router /:persona [get]
+// @router /evento/persona/:persona [get]
 func (c *EventoController) GetEvento() {
 	defer errorhandler.HandlePanic(&c.Controller)
 

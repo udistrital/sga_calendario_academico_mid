@@ -47,7 +47,7 @@ func (c *ActividadCalendarioController) PostActividadCalendario() {
 // @Param	body		body 	{}	true		"body Actualizar responsables de una Actividad content"
 // @Success 200 {}
 // @Failure 403 body is empty
-// @router /update/:id [put]
+// @router /calendario/actividad/:id [put]
 func (c *ActividadCalendarioController) UpdateActividadResponsables() {
 	defer errorhandler.HandlePanic(&c.Controller)
 

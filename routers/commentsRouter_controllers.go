@@ -19,7 +19,7 @@ func init() {
     beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:ActividadCalendarioController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:ActividadCalendarioController"],
         beego.ControllerComments{
             Method: "UpdateActividadResponsables",
-            Router: "/update/:id",
+            Router: "/calendario/actividad/:id",
             AllowHTTPMethods: []string{"put"},
             MethodParams: param.Make(),
             Filters: nil,
@@ -73,7 +73,7 @@ func init() {
     beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:ConsultaCalendarioAcademicoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:ConsultaCalendarioAcademicoController"],
         beego.ControllerComments{
             Method: "PutInhabilitarCalendario",
-            Router: "/inhabilitar_calendario/:id",
+            Router: "/calendario/academico/:id/inhabilitar",
             AllowHTTPMethods: []string{"put"},
             MethodParams: param.Make(),
             Filters: nil,
@@ -109,7 +109,7 @@ func init() {
     beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:ConsultaCalendarioProyectoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:ConsultaCalendarioProyectoController"],
         beego.ControllerComments{
             Method: "GetCalendarProject",
-            Router: "/nivel/:idNiv/periodo/:idPer",
+            Router: "/calendario/proyecto",
             AllowHTTPMethods: []string{"get"},
             MethodParams: param.Make(),
             Filters: nil,
@@ -145,7 +145,7 @@ func init() {
     beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:EventoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:EventoController"],
         beego.ControllerComments{
             Method: "GetEvento",
-            Router: "/:persona",
+            Router: "/evento/persona/:persona",
             AllowHTTPMethods: []string{"get"},
             MethodParams: param.Make(),
             Filters: nil,
