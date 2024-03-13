@@ -29,7 +29,7 @@ paths:
           description: '{}'
         "403":
           description: body is empty
-  /actividad-calendario/update/{id}:
+  /actividad-calendario/calendario/actividad/{id}:
     put:
       tags:
       - actividad-calendario
@@ -186,11 +186,11 @@ paths:
       parameters:
       - in: query
         name: id-nivel
-        description: Id Nivel
+        description: Se recivbe parametro Id de el nivel
         type: string
       - in: query
         name: id-periodo
-        description: Id Periodo
+        description: Se recivbe parametro Id de el Periodo
         type: string
       responses:
         "200":
@@ -308,7 +308,7 @@ paths:
           description: '{}'
         "403":
           description: :id is empty
-  /evento/{persona}:
+  /evento/evento/persona/{persona}:
     get:
       tags:
       - evento

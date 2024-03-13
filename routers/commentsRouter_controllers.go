@@ -19,7 +19,7 @@ func init() {
     beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:ActividadCalendarioController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:ActividadCalendarioController"],
         beego.ControllerComments{
             Method: "UpdateActividadResponsables",
-            Router: "/update/:id",
+            Router: "/calendario/actividad/:id",
             AllowHTTPMethods: []string{"put"},
             MethodParams: param.Make(),
             Filters: nil,
@@ -145,7 +145,7 @@ func init() {
     beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:EventoController"] = append(beego.GlobalControllerRouter["github.com/udistrital/sga_calendario_mid/controllers:EventoController"],
         beego.ControllerComments{
             Method: "GetEvento",
-            Router: "/:persona",
+            Router: "/evento/persona/:persona",
             AllowHTTPMethods: []string{"get"},
             MethodParams: param.Make(),
             Filters: nil,

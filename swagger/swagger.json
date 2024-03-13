@@ -43,7 +43,7 @@
                 }
             }
         },
-        "/actividad-calendario/update/{id}": {
+        "/actividad-calendario/calendario/actividad/{id}": {
             "put": {
                 "tags": [
                     "actividad-calendario"
@@ -255,13 +255,13 @@
                     {
                         "in": "query",
                         "name": "id-nivel",
-                        "description": "Id Nivel",
+                        "description": "Se recivbe parametro Id de el nivel",
                         "type": "string"
                     },
                     {
                         "in": "query",
                         "name": "id-periodo",
-                        "description": "Id Periodo",
+                        "description": "Se recivbe parametro Id de el Periodo",
                         "type": "string"
                     }
                 ],
@@ -413,6 +413,32 @@
                 }
             }
         },
+        "/evento/evento/persona/{persona}": {
+            "get": {
+                "tags": [
+                    "evento"
+                ],
+                "description": "consultar Evento por persona",
+                "operationId": "EventoController.GetEvento",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "persona",
+                        "description": "Persona",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{}"
+                    },
+                    "403": {
+                        "description": ":persona is empty"
+                    }
+                }
+            }
+        },
         "/evento/{id}": {
             "put": {
                 "tags": [
@@ -468,32 +494,6 @@
                     },
                     "403": {
                         "description": ":id is empty"
-                    }
-                }
-            }
-        },
-        "/evento/{persona}": {
-            "get": {
-                "tags": [
-                    "evento"
-                ],
-                "description": "consultar Evento por persona",
-                "operationId": "EventoController.GetEvento",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "persona",
-                        "description": "Persona",
-                        "required": true,
-                        "type": "string"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "{}"
-                    },
-                    "403": {
-                        "description": ":persona is empty"
                     }
                 }
             }
