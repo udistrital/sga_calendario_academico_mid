@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sync"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
@@ -23,42 +24,49 @@ func GetAll() (interface{}, error) {
 	errCalendario := request.GetJson("http://"+beego.AppConfig.String("EventoService")+"calendario?limit=0&sortby=Id&order=desc", &calendarios)
 	if errCalendario == nil {
 		if len(calendarios[0]) > 0 && fmt.Sprintf("%v", calendarios[0]["Nombre"]) != "map[]" {
+			var wg sync.WaitGroup
 			for _, calendario := range calendarios {
-				if calendario["AplicaExtension"].(bool) == false {
+				wg.Add(1)
 
-					var ListarCalendario bool = false
-					if calendario["CalendarioPadreId"] == nil {
-						ListarCalendario = true
-					} else if calendario["Activo"].(bool) == true && calendario["CalendarioPadreId"].(map[string]interface{})["Activo"].(bool) == false {
-						ListarCalendario = true
-					} else {
-						ListarCalendario = false
-					}
+				go func(calendario map[string]interface{}) {
+					defer wg.Done()
+					if calendario["AplicaExtension"].(bool) == false {
 
-					if ListarCalendario {
-						periodoID := fmt.Sprintf("%.f", calendario["PeriodoId"].(float64))
-						errPeriodo := request.GetJson("http://"+beego.AppConfig.String("ParametroService")+"periodo/"+periodoID, &periodo)
-						if errPeriodo == nil {
-							periodoNombre := ""
-							if periodo["Status"] == "200" {
-								periodoNombre = periodo["Data"].(map[string]interface{})["Nombre"].(string)
-							}
-							resultado := map[string]interface{}{
-								"Id":      calendario["Id"].(float64),
-								"Nombre":  calendario["Nombre"].(string),
-								"Nivel":   calendario["Nivel"].(float64),
-								"Activo":  calendario["Activo"].(bool),
-								"Periodo": periodoNombre,
-							}
-							resultados = append(resultados, resultado)
+						var ListarCalendario bool = false
+						if calendario["CalendarioPadreId"] == nil {
+							ListarCalendario = true
+						} else if calendario["Activo"].(bool) == true && calendario["CalendarioPadreId"].(map[string]interface{})["Activo"].(bool) == false {
+							ListarCalendario = true
 						} else {
-							errorGetAll = true
-							message += errPeriodo.Error()
+							ListarCalendario = false
 						}
-					}
 
-				}
+						if ListarCalendario {
+							periodoID := fmt.Sprintf("%.f", calendario["PeriodoId"].(float64))
+							errPeriodo := request.GetJson("http://"+beego.AppConfig.String("ParametroService")+"periodo/"+periodoID, &periodo)
+							if errPeriodo == nil {
+								periodoNombre := ""
+								if periodo["Status"] == "200" {
+									periodoNombre = periodo["Data"].(map[string]interface{})["Nombre"].(string)
+								}
+								resultado := map[string]interface{}{
+									"Id":      calendario["Id"].(float64),
+									"Nombre":  calendario["Nombre"].(string),
+									"Nivel":   calendario["Nivel"].(float64),
+									"Activo":  calendario["Activo"].(bool),
+									"Periodo": periodoNombre,
+								}
+								resultados = append(resultados, resultado)
+							} else {
+								errorGetAll = true
+								message += errPeriodo.Error()
+							}
+						}
+
+					}
+				}(calendario)
 			}
+			wg.Wait()
 		} else {
 			errorGetAll = true
 			message += "No data found"
