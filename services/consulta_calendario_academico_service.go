@@ -17,29 +17,31 @@ import (
 func GetAll() (interface{}, error) {
 	var resultados []map[string]interface{}
 	var calendarios []map[string]interface{}
-	var periodo map[string]interface{}
 	var errorGetAll bool
 	var message string
 
 	errCalendario := request.GetJson("http://"+beego.AppConfig.String("EventoService")+"calendario?limit=0&sortby=Id&order=desc", &calendarios)
 	if errCalendario == nil {
 		if len(calendarios[0]) > 0 && fmt.Sprintf("%v", calendarios[0]["Nombre"]) != "map[]" {
+			fmt.Println(len(calendarios))
 			var wg sync.WaitGroup
-			for _, calendario := range calendarios {
+
+			for i, calendario := range calendarios {
+				fmt.Println("Iteracion: " + fmt.Sprintf("%v", i))
+				var ListarCalendario bool = false
 				wg.Add(1)
-
 				go func(calendario map[string]interface{}) {
-					defer wg.Done()
+					var periodo map[string]interface{}
+					
+					if calendario["CalendarioPadreId"] == nil {
+						ListarCalendario = true
+					} else if calendario["Activo"].(bool) == true && calendario["CalendarioPadreId"].(map[string]interface{})["Activo"].(bool) == false {
+						ListarCalendario = true
+					} else {
+						ListarCalendario = false
+					}
+					fmt.Println("Entra hilo")
 					if calendario["AplicaExtension"].(bool) == false {
-
-						var ListarCalendario bool = false
-						if calendario["CalendarioPadreId"] == nil {
-							ListarCalendario = true
-						} else if calendario["Activo"].(bool) == true && calendario["CalendarioPadreId"].(map[string]interface{})["Activo"].(bool) == false {
-							ListarCalendario = true
-						} else {
-							ListarCalendario = false
-						}
 
 						if ListarCalendario {
 							periodoID := fmt.Sprintf("%.f", calendario["PeriodoId"].(float64))
@@ -56,6 +58,7 @@ func GetAll() (interface{}, error) {
 									"Activo":  calendario["Activo"].(bool),
 									"Periodo": periodoNombre,
 								}
+								fmt.Println(periodoNombre)
 								resultados = append(resultados, resultado)
 							} else {
 								errorGetAll = true
@@ -64,6 +67,7 @@ func GetAll() (interface{}, error) {
 						}
 
 					}
+					wg.Done()
 				}(calendario)
 			}
 			wg.Wait()
