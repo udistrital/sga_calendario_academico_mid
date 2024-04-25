@@ -26,11 +26,10 @@ func GetAll() (interface{}, error) {
 			fmt.Println(len(calendarios))
 			var wg sync.WaitGroup
 
-			for i, calendario := range calendarios {
-				fmt.Println("Iteracion: " + fmt.Sprintf("%v", i))
-				var ListarCalendario bool = false
+			for _, calendario := range calendarios {
 				wg.Add(1)
 				go func(calendario map[string]interface{}) {
+					var ListarCalendario bool = false
 					var periodo map[string]interface{}
 					
 					if calendario["CalendarioPadreId"] == nil {
@@ -40,7 +39,6 @@ func GetAll() (interface{}, error) {
 					} else {
 						ListarCalendario = false
 					}
-					fmt.Println("Entra hilo")
 					if calendario["AplicaExtension"].(bool) == false {
 
 						if ListarCalendario {
@@ -58,7 +56,6 @@ func GetAll() (interface{}, error) {
 									"Activo":  calendario["Activo"].(bool),
 									"Periodo": periodoNombre,
 								}
-								fmt.Println(periodoNombre)
 								resultados = append(resultados, resultado)
 							} else {
 								errorGetAll = true
