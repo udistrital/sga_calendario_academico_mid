@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"sync"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
@@ -12,6 +11,7 @@ import (
 	"github.com/udistrital/utils_oas/request"
 	"github.com/udistrital/utils_oas/requestresponse"
 	"github.com/udistrital/utils_oas/time_bogota"
+	"golang.org/x/sync/errgroup"
 )
 
 func GetAll() (interface{}, error) {
@@ -19,19 +19,22 @@ func GetAll() (interface{}, error) {
 	var calendarios []map[string]interface{}
 	var errorGetAll bool
 	var message string
+	wge := new(errgroup.Group)
 
 	errCalendario := request.GetJson("http://"+beego.AppConfig.String("EventoService")+"calendario?limit=0&sortby=Id&order=desc", &calendarios)
 	if errCalendario == nil {
 		if len(calendarios[0]) > 0 && fmt.Sprintf("%v", calendarios[0]["Nombre"]) != "map[]" {
 			fmt.Println(len(calendarios))
-			var wg sync.WaitGroup
-
+			//Limitación de la cantidad de hilos a utilizar, valores negativas representan sin limite
+			wge.SetLimit(-1)
 			for _, calendario := range calendarios {
-				wg.Add(1)
-				go func(calendario map[string]interface{}) {
+				//Declaración función anonima
+				wge.Go(func() error {
+					fmt.Println("Entra al hilo")
 					var ListarCalendario bool = false
 					var periodo map[string]interface{}
-					
+					var errPeriodo error
+
 					if calendario["CalendarioPadreId"] == nil {
 						ListarCalendario = true
 					} else if calendario["Activo"].(bool) == true && calendario["CalendarioPadreId"].(map[string]interface{})["Activo"].(bool) == false {
@@ -43,7 +46,7 @@ func GetAll() (interface{}, error) {
 
 						if ListarCalendario {
 							periodoID := fmt.Sprintf("%.f", calendario["PeriodoId"].(float64))
-							errPeriodo := request.GetJson("http://"+beego.AppConfig.String("ParametroService")+"periodo/"+periodoID, &periodo)
+							errPeriodo = request.GetJson("http://"+beego.AppConfig.String("ParametroService")+"periodo/"+periodoID, &periodo)
 							if errPeriodo == nil {
 								periodoNombre := ""
 								if periodo["Status"] == "200" {
@@ -62,12 +65,19 @@ func GetAll() (interface{}, error) {
 								message += errPeriodo.Error()
 							}
 						}
+						fmt.Println("Sale del hilo")
 
 					}
-					wg.Done()
-				}(calendario)
+					//Retorna error de las peticiones
+					return errPeriodo
+					//wg.Done()
+				})
+
 			}
-			wg.Wait()
+			//Si existe error, se realiza
+			if err := wge.Wait(); err != nil {
+				errorGetAll = true
+			}
 		} else {
 			errorGetAll = true
 			message += "No data found"
