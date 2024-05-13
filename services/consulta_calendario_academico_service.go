@@ -29,6 +29,8 @@ func GetAll() (interface{}, error) {
 			//Limitación de la cantidad de hilos a utilizar, valores negativas representan sin limite
 			wge.SetLimit(10)
 			for _, calendario := range calendarios {
+
+				calendario := calendario
 				//Declaración función anonima
 				wge.Go(func() error {
 					var ListarCalendario bool = false
@@ -214,6 +216,8 @@ func GetOnePorId(idCalendario string) (interface{}, error) {
 				wge.SetLimit(10)
 				for _, procesoList := range arr {
 
+					procesoList := procesoList
+					
 					wge.Go(func() error {
 						var actividadResultado []map[string]interface{}
 						var procesos []map[string]interface{}
