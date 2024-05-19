@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sort"
+	"strconv"
+	"strings"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
@@ -25,7 +28,6 @@ func GetAll() (interface{}, error) {
 		if len(calendarios[0]) > 0 && fmt.Sprintf("%v", calendarios[0]["Nombre"]) != "map[]" {
 			for _, calendario := range calendarios {
 				if calendario["AplicaExtension"].(bool) == false {
-
 					var ListarCalendario bool = false
 					if calendario["CalendarioPadreId"] == nil {
 						ListarCalendario = true
@@ -37,30 +39,47 @@ func GetAll() (interface{}, error) {
 
 					if ListarCalendario {
 						periodoID := fmt.Sprintf("%.f", calendario["PeriodoId"].(float64))
-						errPeriodo := request.GetJson("http://"+beego.AppConfig.String("ParametroService")+"periodo/"+periodoID, &periodo)
-						if errPeriodo == nil {
-							periodoNombre := ""
-							if periodo["Status"] == "200" {
-								periodoNombre = periodo["Data"].(map[string]interface{})["Nombre"].(string)
-							}
-							resultado := map[string]interface{}{
-								"Id":      calendario["Id"].(float64),
-								"Nombre":  calendario["Nombre"].(string),
-								"Nivel":   calendario["Nivel"].(float64),
-								"Activo":  calendario["Activo"].(bool),
-								"Periodo": periodoNombre,
-							}
-							resultados = append(resultados, resultado)
-						} else {
-							errorGetAll = true
-							message += errPeriodo.Error()
-						}
-					}
+						multiplePeriodoID := calendario["MultiplePeriodoId"].(string)
 
+						//id 8 de doctorado
+						periodoSNombre := ""
+
+						if nivel, ok := calendario["Nivel"].(float64); ok && nivel == 8 {
+							var MultiplePeriodoIds []int
+							_ = json.Unmarshal([]byte(multiplePeriodoID), &MultiplePeriodoIds)
+							var periodos []string
+							for _, periodoID := range MultiplePeriodoIds {
+								errPeriodo := request.GetJson("http://"+beego.AppConfig.String("ParametroService")+"periodo/"+strconv.Itoa(periodoID), &periodo)
+								if errPeriodo == nil {
+									if periodo["Status"] == "200" {
+										periodos = append(periodos, periodo["Data"].(map[string]interface{})["Nombre"].(string))
+									}
+								}
+							}
+							sort.Strings(periodos)
+							periodoSNombre = strings.Join(periodos, ", ")
+						} else {
+							errPeriodo := request.GetJson("http://"+beego.AppConfig.String("ParametroService")+"periodo/"+periodoID, &periodo)
+							if errPeriodo == nil {
+								if periodo["Status"] == "200" {
+									periodoSNombre = periodo["Data"].(map[string]interface{})["Nombre"].(string)
+								}
+							}
+						}
+
+						resultado := map[string]interface{}{
+							"Id":      calendario["Id"].(float64),
+							"Nombre":  calendario["Nombre"].(string),
+							"Nivel":   calendario["Nivel"].(float64),
+							"Activo":  calendario["Activo"].(bool),
+							"Periodo": periodoSNombre,
+						}
+						resultados = append(resultados, resultado)
+					}
 				}
 			}
 		} else {
-			errorGetAll = true
+			errorGetAll = false
 			message += "No data found"
 		}
 	} else {
@@ -505,6 +524,7 @@ func PostCalendarioHijo(data []byte) (interface{}, error) {
 			"DependenciaId":           AuxCalendarioHijo["DependenciaId"],
 			"DocumentoId":             AuxCalendarioHijo["DocumentoId"],
 			"PeriodoId":               AuxCalendarioHijo["PeriodoId"],
+			"MultiplePeriodoId":       AuxCalendarioHijo["MultiplePeriodoId"],
 			"AplicacionId":            0,
 			"Nivel":                   AuxCalendarioHijo["Nivel"],
 			"Activo":                  AuxCalendarioHijo["Activo"],
@@ -809,6 +829,7 @@ func GetCalendarInfo(idCalendario string) (interface{}, error) {
 					"Id":                      idCalendario,
 					"Nombre":                  calendarioAux["Nombre"].(string),
 					"PeriodoId":               calendarioAux["PeriodoId"].(float64),
+					"MultiplePeriodoId":       calendarioAux["MultiplePeriodoId"].(string),
 					"Activo":                  calendarioAux["Activo"].(bool),
 					"Nivel":                   calendarioAux["Nivel"].(float64),
 					"ListaCalendario":         versionCalendarioResultado,
@@ -924,6 +945,7 @@ func GetCalendarInfo(idCalendario string) (interface{}, error) {
 							"Id":                      idCalendario,
 							"Nombre":                  calendario["Nombre"].(string),
 							"PeriodoId":               calendario["PeriodoId"].(float64),
+							"MultiplePeriodoId":       calendario["MultiplePeriodoId"].(string),
 							"Activo":                  calendario["Activo"].(bool),
 							"Nivel":                   calendario["Nivel"].(float64),
 							"ListaCalendario":         versionCalendarioResultado,
