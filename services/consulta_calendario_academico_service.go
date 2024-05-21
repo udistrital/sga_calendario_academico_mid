@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sync"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
@@ -11,22 +12,31 @@ import (
 	"github.com/udistrital/utils_oas/request"
 	"github.com/udistrital/utils_oas/requestresponse"
 	"github.com/udistrital/utils_oas/time_bogota"
+	"golang.org/x/sync/errgroup"
 )
 
 func GetAll() (interface{}, error) {
 	var resultados []map[string]interface{}
 	var calendarios []map[string]interface{}
-	var periodo map[string]interface{}
 	var errorGetAll bool
 	var message string
+	wge := new(errgroup.Group)
 
 	errCalendario := request.GetJson("http://"+beego.AppConfig.String("EventoService")+"calendario?limit=0&sortby=Id&order=desc", &calendarios)
 	if errCalendario == nil {
 		if len(calendarios[0]) > 0 && fmt.Sprintf("%v", calendarios[0]["Nombre"]) != "map[]" {
+			fmt.Println(len(calendarios))
+			//Limitación de la cantidad de hilos a utilizar, valores negativas representan sin limite
+			wge.SetLimit(10)
 			for _, calendario := range calendarios {
-				if calendario["AplicaExtension"].(bool) == false {
 
+				calendario := calendario
+				//Declaración función anonima
+				wge.Go(func() error {
 					var ListarCalendario bool = false
+					var periodo map[string]interface{}
+					var errPeriodo error
+
 					if calendario["CalendarioPadreId"] == nil {
 						ListarCalendario = true
 					} else if calendario["Activo"].(bool) == true && calendario["CalendarioPadreId"].(map[string]interface{})["Activo"].(bool) == false {
@@ -34,33 +44,40 @@ func GetAll() (interface{}, error) {
 					} else {
 						ListarCalendario = false
 					}
+					if calendario["AplicaExtension"].(bool) == false {
 
-					if ListarCalendario {
-						periodoID := fmt.Sprintf("%.f", calendario["PeriodoId"].(float64))
-						errPeriodo := request.GetJson("http://"+beego.AppConfig.String("ParametroService")+"periodo/"+periodoID, &periodo)
-						if errPeriodo == nil {
-							periodoNombre := ""
-							if periodo["Status"] == "200" {
-								periodoNombre = periodo["Data"].(map[string]interface{})["Nombre"].(string)
+						if ListarCalendario {
+							periodoID := fmt.Sprintf("%.f", calendario["PeriodoId"].(float64))
+							errPeriodo = request.GetJson("http://"+beego.AppConfig.String("ParametroService")+"periodo/"+periodoID, &periodo)
+							if errPeriodo == nil {
+								periodoNombre := ""
+								if periodo["Status"] == "200" {
+									periodoNombre = periodo["Data"].(map[string]interface{})["Nombre"].(string)
+								}
+								resultado := map[string]interface{}{
+									"Id":      calendario["Id"].(float64),
+									"Nombre":  calendario["Nombre"].(string),
+									"Nivel":   calendario["Nivel"].(float64),
+									"Activo":  calendario["Activo"].(bool),
+									"Periodo": periodoNombre,
+								}
+								resultados = append(resultados, resultado)
+							} else {
+								return errPeriodo
 							}
-							resultado := map[string]interface{}{
-								"Id":      calendario["Id"].(float64),
-								"Nombre":  calendario["Nombre"].(string),
-								"Nivel":   calendario["Nivel"].(float64),
-								"Activo":  calendario["Activo"].(bool),
-								"Periodo": periodoNombre,
-							}
-							resultados = append(resultados, resultado)
-						} else {
-							errorGetAll = true
-							message += errPeriodo.Error()
 						}
-					}
 
-				}
+					}
+					return nil
+				})
+
+			}
+			//Si existe error, se realiza
+			if err := wge.Wait(); err != nil {
+				errorGetAll = true
 			}
 		} else {
-			errorGetAll = true
+			errorGetAll = false
 			message += "No data found"
 		}
 	} else {
@@ -78,7 +95,6 @@ func GetAll() (interface{}, error) {
 func GetOnePorId(idCalendario string) (interface{}, error) {
 	var resultado map[string]interface{}
 	var resultados []map[string]interface{}
-	var actividadResultado []map[string]interface{}
 	var versionCalendario map[string]interface{}
 	var versionCalendarioResultado []map[string]interface{}
 	var calendarioPadreID map[string]interface{}
@@ -91,6 +107,7 @@ func GetOnePorId(idCalendario string) (interface{}, error) {
 	var procesoAdd map[string]interface{}
 	var responsableTipoP map[string]interface{}
 	var responsableList []map[string]interface{}
+	
 
 	if resultado["Type"] != "error" {
 		// consultar calendario evento por tipo evento
@@ -194,78 +211,96 @@ func GetOnePorId(idCalendario string) (interface{}, error) {
 				}
 				*&procesoArr = arr
 
+				wge := new(errgroup.Group)
+				var mutex sync.Mutex // Mutex para
+
+				wge.SetLimit(10)
 				for _, procesoList := range arr {
 
-					var procesos []map[string]interface{}
-					errproceso := request.GetJson("http://"+beego.AppConfig.String("EventoService")+"calendario_evento?query=TipoEventoId.Id:"+procesoList+"&TipoEventoId__Id.CalendarioID__Id:"+idCalendario, &procesos)
+					procesoList := procesoList
+					
+					wge.Go(func() error {
+						var actividadResultado []map[string]interface{}
+						var procesos []map[string]interface{}
+						errproceso := request.GetJson("http://"+beego.AppConfig.String("EventoService")+"calendario_evento?query=TipoEventoId.Id:"+procesoList+"&TipoEventoId__Id.CalendarioID__Id:"+idCalendario, &procesos)
 
-					if errproceso == nil {
-						if procesos != nil {
-							for _, proceso := range procesos {
+						if errproceso == nil {
+							if procesos != nil {
+								for _, proceso := range procesos {
 
-								// consultar responsables
-								// var responsableString = ""
-								responsableTipoP = nil
-								for _, responsable := range procesos {
+									// consultar responsables
+									// var responsableString = ""
+									responsableTipoP = nil
+									for _, responsable := range procesos {
 
-									calendarioResponsableID := fmt.Sprintf("%.f", responsable["Id"].(float64))
-									var responsables []map[string]interface{}
-									errresponsable := request.GetJson("http://"+beego.AppConfig.String("EventoService")+"calendario_evento_tipo_publico?query=CalendarioEventoId__Id:"+calendarioResponsableID, &responsables)
+										calendarioResponsableID := fmt.Sprintf("%.f", responsable["Id"].(float64))
+										var responsables []map[string]interface{}
+										errresponsable := request.GetJson("http://"+beego.AppConfig.String("EventoService")+"calendario_evento_tipo_publico?query=CalendarioEventoId__Id:"+calendarioResponsableID, &responsables)
 
-									if errresponsable == nil {
-										if responsables != nil {
-											responsableList = nil
-											for _, listRresponsable := range responsables {
-												var responsablesID map[string]interface{} = listRresponsable["TipoPublicoId"].(map[string]interface{})
-												// responsableID := fmt.Sprintf(responsablesID["Nombre"].(string))
-												// responsableString = responsableID + ", " + responsableString
+										if errresponsable == nil {
+											if responsables != nil {
+												responsableList = nil
+												for _, listRresponsable := range responsables {
+													var responsablesID map[string]interface{} = listRresponsable["TipoPublicoId"].(map[string]interface{})
+													// responsableID := fmt.Sprintf(responsablesID["Nombre"].(string))
+													// responsableString = responsableID + ", " + responsableString
 
-												responsableTipoP = map[string]interface{}{
-													"responsableID": responsablesID["Id"].(float64),
-													"Nombre":        fmt.Sprintf(responsablesID["Nombre"].(string)),
+													responsableTipoP = map[string]interface{}{
+														"responsableID": responsablesID["Id"].(float64),
+														"Nombre":        fmt.Sprintf(responsablesID["Nombre"].(string)),
+													}
+													responsableList = append(responsableList, responsableTipoP)
 												}
-												responsableList = append(responsableList, responsableTipoP)
 											}
+										} else {
+											logs.Error(errresponsable.Error())
 										}
-									} else {
-										logs.Error(errresponsable.Error())
 									}
+
+									actividad = nil
+									actividad = map[string]interface{}{
+										"actividadId":   proceso["Id"].(float64),
+										"Nombre":        proceso["Nombre"].(string),
+										"Descripcion":   proceso["Descripcion"].(string),
+										"FechaInicio":   proceso["FechaInicio"].(string),
+										"FechaFin":      proceso["FechaFin"].(string),
+										"Activo":        proceso["Activo"].(bool),
+										"TipoEventoId":  proceso["TipoEventoId"].(map[string]interface{}),
+										"EventoPadreId": proceso["EventoPadreId"],
+										"Responsable":   responsableList,
+									}
+
+									actividadResultado = append(actividadResultado, actividad)
+
 								}
 
-								actividad = nil
-								actividad = map[string]interface{}{
-									"actividadId":   proceso["Id"].(float64),
-									"Nombre":        proceso["Nombre"].(string),
-									"Descripcion":   proceso["Descripcion"].(string),
-									"FechaInicio":   proceso["FechaInicio"].(string),
-									"FechaFin":      proceso["FechaFin"].(string),
-									"Activo":        proceso["Activo"].(bool),
-									"TipoEventoId":  proceso["TipoEventoId"].(map[string]interface{}),
-									"EventoPadreId": proceso["EventoPadreId"],
-									"Responsable":   responsableList,
+								procesoAdd = nil
+								procesoAdd = map[string]interface{}{
+									"Proceso":     procesos[0]["TipoEventoId"].(map[string]interface{})["Nombre"].(string),
+									"Actividades": actividadResultado,
 								}
 
-								actividadResultado = append(actividadResultado, actividad)
+								mutex.Lock()
+								procesoResultado = append(procesoResultado, procesoAdd)
+								mutex.Unlock()
 
+							} else {
+								return nil
 							}
-
-							procesoAdd = nil
-							procesoAdd = map[string]interface{}{
-								"Proceso":     procesos[0]["TipoEventoId"].(map[string]interface{})["Nombre"].(string),
-								"Actividades": actividadResultado,
-							}
-
-							procesoResultado = append(procesoResultado, procesoAdd)
-							actividadResultado = nil
 
 						} else {
-							return requestresponse.APIResponseDTO(true, 200, procesos), nil
+							logs.Error(errproceso.Error())
+							return errproceso
 						}
 
-					} else {
-						logs.Error(errproceso.Error())
-					}
+						return nil
+					})
 				}
+				//Si existe error, se realiza
+				if err := wge.Wait(); err != nil {
+					return requestresponse.APIResponseDTO(false, 400, nil, err), err
+				}
+
 				calendarioAux := calendarios[0]["TipoEventoId"].(map[string]interface{})["CalendarioID"].(map[string]interface{})
 				resultado = map[string]interface{}{
 					"Id":              idCalendario,
@@ -505,6 +540,7 @@ func PostCalendarioHijo(data []byte) (interface{}, error) {
 			"DependenciaId":           AuxCalendarioHijo["DependenciaId"],
 			"DocumentoId":             AuxCalendarioHijo["DocumentoId"],
 			"PeriodoId":               AuxCalendarioHijo["PeriodoId"],
+			"MultiplePeriodoId":       AuxCalendarioHijo["MultiplePeriodoId"],
 			"AplicacionId":            0,
 			"Nivel":                   AuxCalendarioHijo["Nivel"],
 			"Activo":                  AuxCalendarioHijo["Activo"],
@@ -809,6 +845,7 @@ func GetCalendarInfo(idCalendario string) (interface{}, error) {
 					"Id":                      idCalendario,
 					"Nombre":                  calendarioAux["Nombre"].(string),
 					"PeriodoId":               calendarioAux["PeriodoId"].(float64),
+					"MultiplePeriodoId":       calendarioAux["MultiplePeriodoId"].(string),
 					"Activo":                  calendarioAux["Activo"].(bool),
 					"Nivel":                   calendarioAux["Nivel"].(float64),
 					"ListaCalendario":         versionCalendarioResultado,
@@ -924,6 +961,7 @@ func GetCalendarInfo(idCalendario string) (interface{}, error) {
 							"Id":                      idCalendario,
 							"Nombre":                  calendario["Nombre"].(string),
 							"PeriodoId":               calendario["PeriodoId"].(float64),
+							"MultiplePeriodoId":       calendario["MultiplePeriodoId"].(string),
 							"Activo":                  calendario["Activo"].(bool),
 							"Nivel":                   calendario["Nivel"].(float64),
 							"ListaCalendario":         versionCalendarioResultado,
