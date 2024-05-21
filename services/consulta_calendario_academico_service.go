@@ -5,6 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"sort"
+	"strconv"
+	"strings"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/logs"
@@ -77,7 +80,7 @@ func GetAll() (interface{}, error) {
 				errorGetAll = true
 			}
 		} else {
-			errorGetAll = true
+			errorGetAll = false
 			message += "No data found"
 		}
 	} else {
@@ -107,6 +110,7 @@ func GetOnePorId(idCalendario string) (interface{}, error) {
 	var procesoAdd map[string]interface{}
 	var responsableTipoP map[string]interface{}
 	var responsableList []map[string]interface{}
+	
 
 	if resultado["Type"] != "error" {
 		// consultar calendario evento por tipo evento
@@ -539,6 +543,7 @@ func PostCalendarioHijo(data []byte) (interface{}, error) {
 			"DependenciaId":           AuxCalendarioHijo["DependenciaId"],
 			"DocumentoId":             AuxCalendarioHijo["DocumentoId"],
 			"PeriodoId":               AuxCalendarioHijo["PeriodoId"],
+			"MultiplePeriodoId":       AuxCalendarioHijo["MultiplePeriodoId"],
 			"AplicacionId":            0,
 			"Nivel":                   AuxCalendarioHijo["Nivel"],
 			"Activo":                  AuxCalendarioHijo["Activo"],
@@ -843,6 +848,7 @@ func GetCalendarInfo(idCalendario string) (interface{}, error) {
 					"Id":                      idCalendario,
 					"Nombre":                  calendarioAux["Nombre"].(string),
 					"PeriodoId":               calendarioAux["PeriodoId"].(float64),
+					"MultiplePeriodoId":       calendarioAux["MultiplePeriodoId"].(string),
 					"Activo":                  calendarioAux["Activo"].(bool),
 					"Nivel":                   calendarioAux["Nivel"].(float64),
 					"ListaCalendario":         versionCalendarioResultado,
@@ -958,6 +964,7 @@ func GetCalendarInfo(idCalendario string) (interface{}, error) {
 							"Id":                      idCalendario,
 							"Nombre":                  calendario["Nombre"].(string),
 							"PeriodoId":               calendario["PeriodoId"].(float64),
+							"MultiplePeriodoId":       calendario["MultiplePeriodoId"].(string),
 							"Activo":                  calendario["Activo"].(bool),
 							"Nivel":                   calendario["Nivel"].(float64),
 							"ListaCalendario":         versionCalendarioResultado,
