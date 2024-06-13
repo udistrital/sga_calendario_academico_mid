@@ -223,7 +223,7 @@ func GetEvento(persona string) (interface{}, error) {
 					message += "Error: errPeriodo es nil"
 					statusCode = 400
 				} else {
-					evento["Periodo"] = periodo
+					evento["Periodo"] = periodo["Data"]
 				}
 				evento["FechaInicio"] = calendarioEvento["FechaInicio"]
 				evento["FechaFin"] = calendarioEvento["FechaFin"]
