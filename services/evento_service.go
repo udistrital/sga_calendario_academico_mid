@@ -217,13 +217,13 @@ func GetEvento(persona string) (interface{}, error) {
 
 				// cargar periodo
 				var periodo map[string]interface{}
-				errPeriodo := request.GetJson("http://"+beego.AppConfig.String("CoreService")+"periodo/"+fmt.Sprintf("%.f", calendarioEvento["PeriodoId"].(float64)), &periodo)
+				errPeriodo := request.GetJson("http://"+beego.AppConfig.String("ParametroService")+"periodo/"+fmt.Sprintf("%.f", calendarioEvento["PeriodoId"].(float64)), &periodo)
 				if periodo == nil || errPeriodo != nil {
 					success = false
 					message += "Error: errPeriodo es nil"
 					statusCode = 400
 				} else {
-					evento["Periodo"] = periodo
+					evento["Periodo"] = periodo["Data"]
 				}
 				evento["FechaInicio"] = calendarioEvento["FechaInicio"]
 				evento["FechaFin"] = calendarioEvento["FechaFin"]
