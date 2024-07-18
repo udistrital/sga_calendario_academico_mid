@@ -107,7 +107,6 @@ func GetOnePorId(idCalendario string) (interface{}, error) {
 	var procesoAdd map[string]interface{}
 	var responsableTipoP map[string]interface{}
 	var responsableList []map[string]interface{}
-	
 
 	if resultado["Type"] != "error" {
 		// consultar calendario evento por tipo evento
@@ -218,7 +217,7 @@ func GetOnePorId(idCalendario string) (interface{}, error) {
 				for _, procesoList := range arr {
 
 					procesoList := procesoList
-					
+
 					wge.Go(func() error {
 						var actividadResultado []map[string]interface{}
 						var procesos []map[string]interface{}
