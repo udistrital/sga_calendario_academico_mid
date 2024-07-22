@@ -1,9 +1,13 @@
 package main
 
 import (
+	"github.com/go-co-op/gocron"
 	_ "github.com/udistrital/sga_calendario_mid/routers"
+	"github.com/udistrital/sga_calendario_mid/services"
 
 	apistatus "github.com/udistrital/utils_oas/apiStatusLib"
+
+	"time"
 
 	"github.com/astaxie/beego"
 	"github.com/astaxie/beego/plugins/cors"
@@ -33,5 +37,21 @@ func main() {
 	xray.InitXRay()
 	apistatus.Init()
 	auditoria.InitMiddleware()
+
+	// Inicializar el scheduler
+	scheduler := gocron.NewScheduler(time.UTC)
+
+	// Programar la verificación de actividades diarias cada hora
+	scheduler.Every(1).Days().Do(services.VerificacionActividadesDiarias)
+
+	// Programar las actividades de ejecución única
+	services.VerificacionActividadesEjecucionUnica(scheduler)
+
+	// Iniciar el scheduler de manera asíncrona
+	scheduler.StartAsync()
+
 	beego.Run()
+
+	// Mantener el scheduler corriendo
+	select {}
 }
