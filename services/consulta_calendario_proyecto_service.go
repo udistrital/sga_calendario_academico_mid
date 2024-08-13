@@ -68,17 +68,7 @@ func GetCalendarProject(idNiv string, idPer string) (interface{}, error) {
 	var proyectosP []map[string]interface{}
 	var proyectosH []map[string]interface{}
 	var CalendarioId string = "0"
-	/*var calendario map[string]interface{}
-	var proyecto map[string]interface{}
-	var proyectoRetorno []map[string]interface{} */
 	var proyectosArrMap []map[string]interface{}
-	/* var procesoArr []string
-	var calendariosArrMap []map[string]interface{}
-
-	var calendariosFilter []map[string]interface{}
-	var proyectosFilter []map[string]interface{}
-	var proyectosArr map[string]interface{}
-	var salidaFilter []map[string]interface{} */
 
 	// list proyectos padres
 	errProyectosP := request.GetJson("http://"+beego.AppConfig.String("ProyectoAcademicoService")+"proyecto_academico_institucion?query=Activo:true,NivelFormacionId.Id:"+fmt.Sprintf("%v", idNiv)+"&sortby=Nombre&order=asc&limit=0&fields=Id,Nombre", &proyectosP)
